@@ -1,5 +1,8 @@
 package dao;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import javax.persistence.*;
 
 import entidade.Cliente;
@@ -8,7 +11,7 @@ public class ClienteDAO {
 	
 	EntityManagerFactory emf = Persistence.createEntityManagerFactory("bancoPU");
 	
-	public Cliente inserir(Cliente cliente) {
+	public Cliente inserirCliente(Cliente cliente) {
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
 		em.persist(cliente);
@@ -17,7 +20,7 @@ public class ClienteDAO {
 		return cliente;
 	}
 	
-	public Cliente alterar(Cliente cliente) {
+	public Cliente alterarCliente(Cliente cliente) {
 		Cliente clienteBanco = null;
 		if(cliente.getId() != null) {
 			EntityManager em = emf.createEntityManager();
@@ -37,7 +40,7 @@ public class ClienteDAO {
 		return clienteBanco;
 	}
 	
-	public void excluir(Long idCliente) {
+	public void excluirCliente(Long idCliente) {
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
 		Cliente clienteBanco = em.find(Cliente.class, idCliente);
@@ -47,6 +50,37 @@ public class ClienteDAO {
 		em.getTransaction().commit();
 		em.close();
 		
+	}
+	
+	public List<Cliente> listarTodosClientes() {
+		EntityManager em = emf.createEntityManager();
+		Query query = em.createQuery("from Cliente");
+		List<Cliente> resultado = query.getResultList();
+		em.close();
+		return resultado;
+	}
+	
+	public Cliente buscarPorCpf(String cpf) {
+		EntityManager em = emf.createEntityManager();
+		Query query = em.createQuery("from Cliente where cpf = " + cpf);
+		Cliente cliente = (Cliente) query.getSingleResult();
+		em.close();
+		return cliente;
+	}
+	
+	public Cliente buscarPorId(Long idCliente) {
+		EntityManager em = emf.createEntityManager();
+		Cliente cliente = em.find(Cliente.class, idCliente);
+		em.close();
+		return cliente;
+	}
+	
+	public List<Cliente> listarPorPeriodoNascimento(LocalDate dataInicial, LocalDate dataFinal) {
+		EntityManager em = emf.createEntityManager();
+		Query query = em.createQuery("from Cliente where FUNCTION('DATE', dataNascimento) >= " + dataInicial + " AND FUNCTION('DATE', dataNascimento) <= " + dataFinal);
+		List<Cliente> resultado = query.getResultList();
+		em.close();
+		return resultado;
 	}
 	
 }

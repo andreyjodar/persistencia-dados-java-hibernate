@@ -11,14 +11,29 @@ public class Movimentacao {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	@ManyToOne
-	@JoinColumn(name = "id_conta")
+	@JoinColumn(name = "id_conta", nullable = false)
 	private Conta conta;
-	@Column(name = "valor_operacao")
+	@Enumerated(EnumType.STRING)
+	@Column(name = "tipo_transacao", nullable = false)
+	private TransacaoTipo tipoTransacao;
+	@Column(name = "valor_operacao", nullable = false)
 	private Double valorOperacao;
+	@Column(name = "data_transacao", nullable = false)
 	private LocalDateTime dataTransacao;
-	@Column(length = 150, name = "descricao", nullable = true, unique = false)
+	@Column(length = 150, name = "descricao", nullable = true)
 	private String descricao;
-	private String tipoTransacao;
+	
+	public Movimentacao() {
+		
+	}
+	
+	public Movimentacao(Conta conta, TransacaoTipo tipoTransacao, Double valorOperacao, String descricao) {
+		this.conta = conta;
+		this.tipoTransacao = tipoTransacao;
+		this.valorOperacao = valorOperacao;
+		this.dataTransacao = LocalDateTime.now();
+		this.descricao = descricao;
+	}
 
 	public Long getId() {
 		return id;
@@ -52,11 +67,11 @@ public class Movimentacao {
 		this.descricao = descricao;
 	}
 
-	public String getTipoTransacao() {
+	public TransacaoTipo getTipoTransacao() {
 		return tipoTransacao;
 	}
 
-	public void setTipoTransacao(String tipoTransacao) {
+	public void setTipoTransacao(TransacaoTipo tipoTransacao) {
 		this.tipoTransacao = tipoTransacao;
 	}
 	

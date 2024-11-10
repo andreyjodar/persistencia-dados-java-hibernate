@@ -10,16 +10,16 @@ public class MovimentacaoControle {
 	
 	MovimentacaoServico servico = new MovimentacaoServico();
 		
-	public Movimentacao inserir(Movimentacao conta) {
-		return servico.inserir(conta);
+	public Movimentacao inserirMovimentacao(Movimentacao movimentacao) {
+		return servico.inserirMovimentacao(movimentacao);
 	}
 	
-	public void excluir(Long idConta) {
-		servico.excluir(idConta);
+	public void excluirMovimentacao(Long idMovimentacao) {
+		servico.excluirMovimentacao(idMovimentacao);
 	}
 	
-	public Movimentacao alterar(Movimentacao conta) {
-		return servico.alterar(conta);
+	public Movimentacao alterarMovimentacao(Movimentacao movimentacao) {
+		return servico.alterarMovimentacao(movimentacao);
 	}
 	
 	public List<Movimentacao> listarTodos() {

@@ -10,6 +10,7 @@ import entidade.Cliente;
 import entidade.Conta;
 import entidade.ContaTipo;
 import entidade.Movimentacao;
+import entidade.TransacaoTipo;
 
 public class MovimentacaoTela {
 
@@ -21,21 +22,22 @@ public class MovimentacaoTela {
 		Cliente cliente = new Cliente();
 		cliente.setCpf("10162344902");
 		cliente.setNome("Andrey Jodar");
-		daoCliente.inserir(cliente);
+		cliente.setDataNascimento(LocalDate.parse("2005-10-14"));
 		
 		Conta conta = new Conta();
-		conta.setCliente(cliente);
+		conta.setCliente(daoCliente.inserirCliente(cliente));
 		conta.setContaTipo(ContaTipo.CONTA_CORRENTE);
 		conta.setDataAbertura(LocalDateTime.now());
 		
 		
 		Movimentacao movimentacao = new Movimentacao();
+		movimentacao.setConta(daoConta.inserirConta(conta));
 		movimentacao.setDataTransacao(LocalDateTime.now());
-		movimentacao.setTipoTransacao("Depósito");
+		movimentacao.setTipoTransacao(TransacaoTipo.DEPOSITO);
 		movimentacao.setValorOperacao(200.0);
 		movimentacao.setDescricao("Depósito de R$200 07/11/2024");
 		
-		daoMovimentacao.inserir(movimentacao);
+		movimentacao = daoMovimentacao.inserirMovimentacao(movimentacao);
 	}
 
 }

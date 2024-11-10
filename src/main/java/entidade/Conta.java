@@ -10,13 +10,26 @@ public class Conta {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	@ManyToOne
-	@JoinColumn(name = "id_cliente")
+	@JoinColumn(name = "id_cliente", nullable = false)
 	private Cliente cliente;
 	@Enumerated(EnumType.STRING)
+	@Column(name = "tipo_conta", nullable = false)
 	private ContaTipo contaTipo;
+	@Column(name = "data_abertura", nullable = false)
 	private LocalDateTime dataAbertura;
+	@Column(name = "saldo", nullable = false)
 	private Double saldo;
 
+	public Conta() {
+		
+	}
+	
+	public Conta(Cliente cliente, ContaTipo contaTipo, LocalDateTime dataAbertura, Double saldo) {
+		this.cliente = cliente;
+		this.contaTipo = contaTipo;
+		this.dataAbertura = dataAbertura;
+		this.saldo = saldo;
+	}
 	
 	public Long getId() {
 		return id;

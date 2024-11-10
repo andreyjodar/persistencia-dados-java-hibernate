@@ -5,24 +5,25 @@ import java.util.List;
 import java.time.*;
 import javax.persistence.*;
 
+import entidade.Conta;
 import entidade.Movimentacao;
 
 public class MovimentacaoDAO {
 
 	EntityManagerFactory emf = Persistence.createEntityManagerFactory("bancoPU");
 
-	public Movimentacao inserir(Movimentacao conta) {
+	public Movimentacao inserirMovimentacao(Movimentacao movimentacao) {
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
-		em.persist(conta);
+		em.persist(movimentacao);
 		em.getTransaction().commit();
 		em.close();
-		return conta;
+		return movimentacao;
 	}
 
-	public Movimentacao alterar(Movimentacao conta) {
+	public Movimentacao alterarMovimentacao(Movimentacao conta) {
 		Movimentacao contaBanco = null;
-		if (conta.getId() != null && conta.getConta() != null) {
+		if (conta.getId() != null) {
 			EntityManager em = emf.createEntityManager();
 			em.getTransaction().begin();
 
@@ -39,14 +40,29 @@ public class MovimentacaoDAO {
 		return contaBanco;
 	}
 
-	public void excluir(Long id) {
+	public void excluirMovimentacao(Long idMovimentacao) {
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
-		Movimentacao conta = em.find(Movimentacao.class, id);
-		if (conta != null) {
-			em.remove(conta);
+		Movimentacao movimentacao = em.find(Movimentacao.class, idMovimentacao);
+		if (movimentacao != null) {
+			em.remove(movimentacao);
 		}
 		em.getTransaction().commit();
+		em.close();
+	}
+	
+	public void excluirPorConta(Long idConta) {
+		EntityManager em = emf.createEntityManager();
+		em.getTransaction().begin();
+		Query query = em.createQuery("delete from Movimentacao where conta.id = " + idConta);
+		query.executeUpdate();
+		em.close();
+	}
+	
+	public void excluirPorCliente(Long idCliente) {
+		EntityManager em = emf.createEntityManager();
+		Query query = em.createQuery("delete from Movimentacao where conta.cliente.id = " + idCliente);
+		query.executeUpdate();
 		em.close();
 	}
 
