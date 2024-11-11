@@ -24,7 +24,7 @@ public class Movimentacao {
 	private String descricao;
 	
 	public Movimentacao() {
-		
+		this.dataTransacao = LocalDateTime.now();
 	}
 	
 	public Movimentacao(Conta conta, TransacaoTipo tipoTransacao, Double valorOperacao, String descricao) {

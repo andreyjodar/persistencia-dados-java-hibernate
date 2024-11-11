@@ -18,7 +18,6 @@ public class ContaServico {
 	
 	public Conta inserirConta(Conta conta) {
 		if(verificarCamposNaoNulos(conta) && conta.getCliente().getId() != null && daoConta.listarPorIdCliente(conta.getCliente().getId()).size() < 3) {
-			conta.setSaldo(0.0);
 			Conta contaValida = daoConta.inserirConta(conta);
 			return contaValida;
 		}
@@ -26,7 +25,9 @@ public class ContaServico {
 	}
 	
 	public Conta alterarConta(Conta conta) {
-		conta.setSaldo(MovimentacaoServico.calcularSaldo(conta.getCliente().getCpf()));
+		if(conta.getCliente().getId() != null) {
+			conta.setSaldo(MovimentacaoServico.calcularSaldo(conta.getCliente().getId()));
+		}
 		return daoConta.alterarConta(conta);
 	}
 	
@@ -42,7 +43,7 @@ public class ContaServico {
 	}
 	
 	public static boolean verificarCamposNaoNulos(Conta conta) {
-		return conta != null && conta.getCliente() != null && conta.getContaTipo() != null && conta.getDataAbertura() != null; 
+		return conta != null && conta.getCliente() != null && conta.getContaTipo() != null && conta.getDataAbertura() != null && conta.getSaldo() != null; 
 	}
 	
 	public List<Conta> listarTodasContas() {

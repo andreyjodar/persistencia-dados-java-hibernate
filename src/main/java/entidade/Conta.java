@@ -21,14 +21,14 @@ public class Conta {
 	private Double saldo;
 
 	public Conta() {
-		
+		this.saldo = 0.0;
 	}
 	
-	public Conta(Cliente cliente, ContaTipo contaTipo, LocalDateTime dataAbertura, Double saldo) {
+	public Conta(Cliente cliente, ContaTipo contaTipo, LocalDateTime dataAbertura) {
 		this.cliente = cliente;
 		this.contaTipo = contaTipo;
 		this.dataAbertura = dataAbertura;
-		this.saldo = saldo;
+		this.saldo = 0.0;
 	}
 	
 	public Long getId() {

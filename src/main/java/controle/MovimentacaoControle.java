@@ -8,41 +8,62 @@ import servico.MovimentacaoServico;
 
 public class MovimentacaoControle {
 	
-	MovimentacaoServico servico = new MovimentacaoServico();
+	MovimentacaoServico servicoMovimentacao = new MovimentacaoServico();
 		
 	public Movimentacao inserirMovimentacao(Movimentacao movimentacao) {
-		return servico.inserirMovimentacao(movimentacao);
+		return servicoMovimentacao.inserirMovimentacao(movimentacao);
 	}
 	
 	public void excluirMovimentacao(Long idMovimentacao) {
-		servico.excluirMovimentacao(idMovimentacao);
+		servicoMovimentacao.excluirMovimentacao(idMovimentacao);
+	}
+	
+	public void excluirPorConta(Long idConta) {
+		servicoMovimentacao.excluirPorConta(idConta);
+	}
+	
+	public void excluirPorCliente(Long idCliente) {
+		servicoMovimentacao.excluirPorConta(idCliente);
 	}
 	
 	public Movimentacao alterarMovimentacao(Movimentacao movimentacao) {
-		return servico.alterarMovimentacao(movimentacao);
+		return servicoMovimentacao.alterarMovimentacao(movimentacao);
 	}
 	
 	public List<Movimentacao> listarTodos() {
-		return servico.listarTodos();
+		return servicoMovimentacao.listarTodos();
 	}
 	
-	public List<Movimentacao> listarPorCpf(String cpfCorrentista) {
-		return servico.listarPorCpf(cpfCorrentista);
+	public List<Movimentacao> listarPorCliente(Long idCliente) {
+		return servicoMovimentacao.listarPorCliente(idCliente);
+	}
+	
+	public List<Movimentacao> listarPorConta(Long idConta) {
+		return servicoMovimentacao.listarPorConta(idConta);
 	}
 	
 	public List<Movimentacao> listarPorDataTransacao(LocalDate dataTransacao) {
-		return servico.listarPorDataTransacao(dataTransacao);
+		return servicoMovimentacao.listarPorDataTransacao(dataTransacao);
 	}
 	
-	public List<Movimentacao> listarPorCpfEDataTransacao(String cpfCorrentista, LocalDate dataTransacao) {
-		return servico.listarPorCpfEDataTransacao(cpfCorrentista, dataTransacao);
+	public List<Movimentacao> listarExtratoMensalConta(Long idConta, int mes, int ano) {
+		return servicoMovimentacao.listarExtratoMensalConta(idConta, mes, ano);
 	}
 	
-	public List<Movimentacao> listarExtratoPeriodico(String cpfCorrentista, LocalDate dataInicial, LocalDate dataFinal) {
-		return servico.listarExtratoPeriodico(cpfCorrentista, dataInicial, dataFinal);
+	public List<Movimentacao> listarExtratoMensalCliente(Long idCliente, int mes, int ano) {
+		return servicoMovimentacao.listarExtratoMensalCliente(idCliente, mes, ano);
 	}
+	
+	public List<Movimentacao> listarExtratoPeriodicoConta(Long idConta, LocalDate dataInicial, LocalDate dataFinal) {
+		return servicoMovimentacao.listarExtratoPeriodicoConta(idConta, dataInicial, dataFinal);
+	}
+	
+	public List<Movimentacao> listarExtratoPeriodicoCliente(Long idCliente, LocalDate dataInicial, LocalDate dataFinal) {
+		return servicoMovimentacao.listarExtratoPeriodicoCliente(idCliente, dataInicial, dataFinal);
+	}
+	
 	public Movimentacao buscarPorId(Long id) {
-		return servico.buscarPorId(id);
+		return servicoMovimentacao.buscarPorId(id);
 	}
 
 }

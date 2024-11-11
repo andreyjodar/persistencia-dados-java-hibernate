@@ -10,7 +10,7 @@ public class ClienteControle {
 
 	ClienteServico servicoCliente = new ClienteServico();
 	
-	public Cliente inserir(Cliente cliente) {
+	public Cliente inserirCliente(Cliente cliente) {
 		return servicoCliente.inserirCliente(cliente);
 	}
 	
@@ -32,5 +32,9 @@ public class ClienteControle {
 	
 	public Cliente getClientePorCpf(String cpf) {
 		return servicoCliente.buscarPorCpf(cpf);
+	}
+	
+	public Cliente getClientePorId(Long idCliente) {
+		return servicoCliente.buscarPorId(idCliente);
 	}
 }

@@ -62,10 +62,15 @@ public class ClienteDAO {
 	
 	public Cliente buscarPorCpf(String cpf) {
 		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Cliente where cpf = " + cpf);
-		Cliente cliente = (Cliente) query.getSingleResult();
-		em.close();
-		return cliente;
+		try {
+			Query query = em.createQuery("from Cliente where cpf = " + cpf);
+			Cliente cliente = (Cliente) query.getSingleResult();
+			return cliente;
+		} catch (NoResultException e) {
+			return null;
+		} finally {
+			em.close();
+		}
 	}
 	
 	public Cliente buscarPorId(Long idCliente) {

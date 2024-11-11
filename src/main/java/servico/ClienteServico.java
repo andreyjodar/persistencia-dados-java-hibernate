@@ -15,9 +15,13 @@ public class ClienteServico {
 	MovimentacaoDAO daoMovimentacao = new MovimentacaoDAO();
 
 	public Cliente inserirCliente(Cliente cliente) {
-		if(verificarCamposNaoNulos(cliente) && Cpf.verificarCpf(cliente.getCpf()) && daoCliente.buscarPorCpf(cliente.getCpf()) == null) {
-			Cliente clienteValido = daoCliente.inserirCliente(cliente);
-			return clienteValido;
+		if(verificarCamposNaoNulos(cliente) && Cpf.verificarCpf(cliente.getCpf())) {
+			Cliente clienteInsercao = daoCliente.buscarPorCpf(cliente.getCpf());
+			if(clienteInsercao == null) {
+				clienteInsercao = daoCliente.inserirCliente(cliente);
+				return clienteInsercao;
+			}
+			return null;
 		} 
 		return null;
 	}
@@ -47,8 +51,13 @@ public class ClienteServico {
 	}
 	
 	public Cliente buscarPorCpf(String cpf) {
-		return daoCliente.buscarPorCpf(cpf);
+		if(Cpf.verificarCpf(cpf)) {
+			return daoCliente.buscarPorCpf(cpf);
+		}
+		return null;
 	}
 	
-	
+	public Cliente buscarPorId(Long idCliente) {
+		return daoCliente.buscarPorId(idCliente);
+	}
 }
