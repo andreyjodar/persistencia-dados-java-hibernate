@@ -4,11 +4,13 @@ import java.time.*;
 import java.util.List;
 
 import dao.MovimentacaoDAO;
+import entidade.Conta;
 import entidade.Movimentacao;
 import entidade.TransacaoTipo;
 
 public class MovimentacaoServico {
 	static MovimentacaoDAO daoMovimentacao = new MovimentacaoDAO();
+	static ContaServico servicoConta = new ContaServico();
 	
 	// Verificar Fraude
 	public Movimentacao inserirMovimentacao(Movimentacao movimentacao) {
@@ -16,9 +18,10 @@ public class MovimentacaoServico {
 			aplicarTarifaOperacao(movimentacao);
 			if(verificarLimites(movimentacao)) {
 				if(verificarSaldo(movimentacao)) {
-					Movimentacao contaBanco = daoMovimentacao.inserirMovimentacao(movimentacao);
+					Movimentacao movimentacaoBanco = daoMovimentacao.inserirMovimentacao(movimentacao);
+					servicoConta.atualizarConta(movimentacaoBanco.getConta());
 					notificarSaldoBaixo(movimentacao.getConta().getId());
-					return contaBanco;
+					return movimentacaoBanco;
 				} 
 				return null;
 			} 
@@ -52,7 +55,7 @@ public class MovimentacaoServico {
 			} 
 			return true;
 		} else if (movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE) {
-			if (calcularSaquesDiarios(movimentacao.getConta().getId(), movimentacao.getDataTransacao().toLocalDate()) >= 5000) {
+			if (calcularSaquesDiarios(movimentacao.getConta().getId(), movimentacao.getDataTransacao().toLocalDate()) + movimentacao.getValorOperacao() >= 5000) {
 				return false;
 			} 
 			return true;
@@ -61,8 +64,8 @@ public class MovimentacaoServico {
 	}
 
 	public static boolean verificarSaldo(Movimentacao movimentacao) {
-		if(movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE|| movimentacao.getTipoTransacao() == TransacaoTipo.PIX || movimentacao.getTipoTransacao() == TransacaoTipo.PAGAMENTO) {
-			if (calcularSaldo(movimentacao.getConta().getCliente().getId()) >= movimentacao.getValorOperacao()) {
+		if(movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE || movimentacao.getTipoTransacao() == TransacaoTipo.PIX || movimentacao.getTipoTransacao() == TransacaoTipo.PAGAMENTO) {
+			if (calcularSaldo(movimentacao.getConta().getId()) >= movimentacao.getValorOperacao()) {
 				return true;
 			} else {
 				return false;
@@ -134,6 +137,15 @@ public class MovimentacaoServico {
 			movimentacao.setValorOperacao(movimentacao.getValorOperacao() + 5);
 		} else if (movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE) {
 			movimentacao.setValorOperacao(movimentacao.getValorOperacao() + 2);
+		}
+	}
+	
+	public static void aplicarCashback(Movimentacao movimentacao) {
+		if(movimentacao.getTipoTransacao() == TransacaoTipo.DEBITO_CARTAO) {
+			Double valorCashBack = movimentacao.getValorOperacao() * 0.002;
+			Conta conta = movimentacao.getConta();
+			conta.setCashBackAcumulado(conta.getCashBackAcumulado() + valorCashBack);
+			servicoConta.atualizarConta(conta);
 		}
 	}
 	

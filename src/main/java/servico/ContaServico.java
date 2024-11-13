@@ -25,10 +25,21 @@ public class ContaServico {
 	}
 	
 	public Conta alterarConta(Conta conta) {
-		if(conta.getCliente().getId() != null) {
-			conta.setSaldo(MovimentacaoServico.calcularSaldo(conta.getCliente().getId()));
-		}
 		return daoConta.alterarConta(conta);
+	}
+	
+	public Conta atualizarConta(Conta conta) {
+		if(conta.getId() != null) {
+			conta.setSaldo(MovimentacaoServico.calcularSaldo(conta.getId()));
+			LocalDate hoje = LocalDate.now();
+			LocalDate mesAnterior = hoje.minusMonths(1);
+			if(conta.getUltimaAtualizacaoCashback() == null || conta.getUltimaAtualizacaoCashback().isBefore(mesAnterior.withDayOfMonth(1))) {
+				conta.setSaldo(conta.getSaldo() + conta.getCashBackAcumulado());
+				conta.setCashBackAcumulado(0.0);
+				conta.setUltimaAtualizaçãoCashback(hoje.withDayOfMonth(1));
+			}
+		}
+		return daoConta.altualizarConta(conta);
 	}
 	
 	public void excluirConta(Long idConta) {
@@ -46,6 +57,10 @@ public class ContaServico {
 		return conta != null && conta.getCliente() != null && conta.getContaTipo() != null && conta.getDataAbertura() != null && conta.getSaldo() != null; 
 	}
 	
+	public Conta buscarPorId(Long idConta) {
+		return daoConta.buscarPorId(idConta);
+	}
+	
 	public List<Conta> listarTodasContas() {
 		return daoConta.listarTodasContas();
 	}
@@ -61,4 +76,15 @@ public class ContaServico {
 	public List<Conta> listarPorPeriodoCriacao(LocalDate dataInicial, LocalDate dataFinal) {
 		return daoConta.listarPorPeriodoCriacao(dataInicial, dataFinal);
 	}
+	
+	public Double calcularRendimentoMensal(Long idConta, Double taxaJuros) {
+		Conta conta = daoConta.buscarPorId(idConta);
+		if(conta.getContaTipo() == ContaTipo.CONTA_POUPANCA) {
+			Double montante = conta.getSaldo() * Math.pow((1 + taxaJuros), 1);
+			Double rendimento = montante - conta.getSaldo();
+			return rendimento;
+		}
+		return 0.0;
+	}
+	
 }

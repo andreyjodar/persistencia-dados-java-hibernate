@@ -19,9 +19,14 @@ public class Conta {
 	private LocalDateTime dataAbertura;
 	@Column(name = "saldo", nullable = false)
 	private Double saldo;
+	@Column(name = "cashback_acumulado", nullable = false)
+	private Double cashbackAcumulado;
+	@Column(name = "ultima_atualizacao_cashback")
+	private LocalDate ultimaAtualizacaoCashback;
 
 	public Conta() {
 		this.saldo = 0.0;
+		this.cashbackAcumulado = 0.0;
 	}
 	
 	public Conta(Cliente cliente, ContaTipo contaTipo, LocalDateTime dataAbertura) {
@@ -29,6 +34,7 @@ public class Conta {
 		this.contaTipo = contaTipo;
 		this.dataAbertura = dataAbertura;
 		this.saldo = 0.0;
+		this.cashbackAcumulado = 0.0;
 	}
 	
 	public Long getId() {
@@ -69,5 +75,21 @@ public class Conta {
 	
 	public void setSaldo(Double saldo) {
 		this.saldo = saldo;
+	}
+	
+	public Double getCashBackAcumulado() {
+		return cashbackAcumulado;
+	}
+	
+	public void setCashBackAcumulado(Double cashbackAcumulado) {
+		this.cashbackAcumulado = cashbackAcumulado;
+	}
+	
+	public LocalDate getUltimaAtualizacaoCashback() {
+		return this.ultimaAtualizacaoCashback;
+	}
+	
+	public void setUltimaAtualizaçãoCashback(LocalDate ultimaAtualizacaoCashback) {
+		this.ultimaAtualizacaoCashback = ultimaAtualizacaoCashback;
 	}
 }

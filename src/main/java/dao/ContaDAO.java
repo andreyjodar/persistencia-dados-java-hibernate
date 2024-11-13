@@ -33,7 +33,26 @@ public class ContaDAO {
 			contaBanco = em.find(Conta.class, conta.getId());
 			if(contaBanco != null) {
 				contaBanco.setContaTipo(conta.getContaTipo());
+				em.merge(contaBanco);
+			}
+			
+			em.getTransaction().commit();
+			em.close();
+		}
+		
+		return contaBanco;
+	}
+	
+	public Conta altualizarConta(Conta conta) {
+		Conta contaBanco = null;
+		if(conta.getId() != null) {
+			EntityManager em = emf.createEntityManager();
+			em.getTransaction().begin();
+			
+			contaBanco = em.find(Conta.class, conta.getId());
+			if(contaBanco != null) {
 				contaBanco.setSaldo(conta.getSaldo());
+				contaBanco.setCashBackAcumulado(conta.getCashBackAcumulado());
 				em.merge(contaBanco);
 			}
 			

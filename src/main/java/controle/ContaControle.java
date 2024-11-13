@@ -22,6 +22,10 @@ public class ContaControle {
 		servicoConta.excluirConta(idConta);
 	}
 	
+	public Conta buscarPorId(Long idConta) {
+		return servicoConta.buscarPorId(idConta);
+	}
+	
 	public List<Conta> getTodasContas() {
 		return servicoConta.listarTodasContas();
 	}
