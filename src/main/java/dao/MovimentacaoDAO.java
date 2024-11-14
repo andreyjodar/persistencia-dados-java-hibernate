@@ -7,6 +7,7 @@ import javax.persistence.*;
 
 import entidade.Conta;
 import entidade.Movimentacao;
+import entidade.TransacaoTipo;
 
 public class MovimentacaoDAO {
 
@@ -145,6 +146,15 @@ public class MovimentacaoDAO {
 		em.close();
 		return resultado;
 	}
+	
+	public List<Movimentacao> listarPeriodicoPorTipoTransacao(Long idConta, TransacaoTipo tipoTransacao, LocalDate dataInicial, LocalDate dataFinal) {
+		EntityManager em = emf.createEntityManager();
+		Query query = em.createQuery("from Movimentacao m where m.tipoTransacao = :tipoTransacao and m.conta.id=" + idConta + " and function('DATE', m.dataTransacao) between "+ dataInicial + "and " + dataFinal);
+		query.setParameter("tipoTransacao", tipoTransacao);
+		List<Movimentacao> resultado = query.getResultList();
+		em.close();
+		return resultado;
+	}
 
 	public Movimentacao buscarPorId(Long id) {
 		EntityManager em = emf.createEntityManager();
@@ -152,4 +162,5 @@ public class MovimentacaoDAO {
 		em.close();
 		return conta;
 	}
+	
 }

@@ -43,26 +43,6 @@ public class ContaDAO {
 		return contaBanco;
 	}
 	
-	public Conta altualizarConta(Conta conta) {
-		Conta contaBanco = null;
-		if(conta.getId() != null) {
-			EntityManager em = emf.createEntityManager();
-			em.getTransaction().begin();
-			
-			contaBanco = em.find(Conta.class, conta.getId());
-			if(contaBanco != null) {
-				contaBanco.setSaldo(conta.getSaldo());
-				contaBanco.setCashBackAcumulado(conta.getCashBackAcumulado());
-				em.merge(contaBanco);
-			}
-			
-			em.getTransaction().commit();
-			em.close();
-		}
-		
-		return contaBanco;
-	}
-	
 	public void excluirConta(Long idConta) {
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
@@ -101,7 +81,8 @@ public class ContaDAO {
 	
 	public List<Conta> listarPorContaTipo(ContaTipo contaTipo){
 		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Conta where contaTipo = " + contaTipo);
+		Query query = em.createQuery("from Conta where contaTipo = :contaTipo");
+		query.setParameter("contaTipo", contaTipo);
 		List<Conta> resultado = query.getResultList();
 		em.close();
 		return resultado;

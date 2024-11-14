@@ -22,16 +22,19 @@ public class Movimentacao {
 	private LocalDateTime dataTransacao;
 	@Column(length = 150, name = "descricao", nullable = true)
 	private String descricao;
+	@Column(name = "cashback")
+	private Double cashback;
 	
 	public Movimentacao() {
 		this.dataTransacao = LocalDateTime.now();
+		this.cashback = 0.0;
 	}
 	
 	public Movimentacao(Conta conta, TransacaoTipo tipoTransacao, Double valorOperacao, String descricao) {
+		this();
 		this.conta = conta;
 		this.tipoTransacao = tipoTransacao;
 		this.valorOperacao = valorOperacao;
-		this.dataTransacao = LocalDateTime.now();
 		this.descricao = descricao;
 	}
 
@@ -81,5 +84,13 @@ public class Movimentacao {
 	
 	public void setConta(Conta conta) {
 		this.conta = conta;
+	}
+	
+	public Double getCashback() {
+		return cashback;
+	}
+	
+	public void setCashback(Double cashback) {
+		this.cashback = cashback;
 	}
 }

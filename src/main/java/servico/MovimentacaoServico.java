@@ -14,13 +14,11 @@ public class MovimentacaoServico {
 	
 	// Verificar Fraude
 	public Movimentacao inserirMovimentacao(Movimentacao movimentacao) {
-		if(verificarCamposNaoNulos(movimentacao) && movimentacao.getConta().getId() != null && movimentacao.getConta().getCliente() != null && movimentacao.getConta().getCliente().getId() != null) {
+		if(verificarCamposNaoNulos(movimentacao)) {
 			aplicarTarifaOperacao(movimentacao);
 			if(verificarLimites(movimentacao)) {
 				if(verificarSaldo(movimentacao)) {
 					Movimentacao movimentacaoBanco = daoMovimentacao.inserirMovimentacao(movimentacao);
-					servicoConta.atualizarConta(movimentacaoBanco.getConta());
-					notificarSaldoBaixo(movimentacao.getConta().getId());
 					return movimentacaoBanco;
 				} 
 				return null;
@@ -55,7 +53,7 @@ public class MovimentacaoServico {
 			} 
 			return true;
 		} else if (movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE) {
-			if (calcularSaquesDiarios(movimentacao.getConta().getId(), movimentacao.getDataTransacao().toLocalDate()) + movimentacao.getValorOperacao() >= 5000) {
+			if (servicoConta.calcularSaquePorDia(movimentacao.getConta().getId(), movimentacao.getDataTransacao().toLocalDate()) + movimentacao.getValorOperacao() >= 5000) {
 				return false;
 			} 
 			return true;
@@ -65,7 +63,7 @@ public class MovimentacaoServico {
 
 	public static boolean verificarSaldo(Movimentacao movimentacao) {
 		if(movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE || movimentacao.getTipoTransacao() == TransacaoTipo.PIX || movimentacao.getTipoTransacao() == TransacaoTipo.PAGAMENTO) {
-			if (calcularSaldo(movimentacao.getConta().getId()) >= movimentacao.getValorOperacao()) {
+			if (servicoConta.calcularSaldo(movimentacao.getConta().getId()) >= movimentacao.getValorOperacao()) {
 				return true;
 			} else {
 				return false;
@@ -76,7 +74,7 @@ public class MovimentacaoServico {
 	}
 	
 	public static boolean verificarCamposNaoNulos(Movimentacao movimentacao) {
-		return movimentacao.getConta() != null && movimentacao.getDataTransacao() != null && movimentacao.getTipoTransacao() != null && movimentacao.getValorOperacao() != null;
+		return movimentacao.getConta() != null && movimentacao.getConta().getId() != null && movimentacao.getDataTransacao() != null && movimentacao.getTipoTransacao() != null && movimentacao.getValorOperacao() != null;
 	}
 	
 	// Definir verificação de Fraude
@@ -101,51 +99,14 @@ public class MovimentacaoServico {
 		}
 		return false;
 	}
-
-	public static Double calcularSaldo(Long idConta) {
-		List<Movimentacao> transacoes = daoMovimentacao.listarPorConta(idConta);
-		Double saldo = 0.0;
-		for (Movimentacao movimentacao : transacoes) {
-			if(movimentacao.getTipoTransacao() == TransacaoTipo.DEPOSITO) {
-				saldo += movimentacao.getValorOperacao();
-			} else {
-				saldo -= movimentacao.getValorOperacao();
-			}
-		}
-		return saldo;
-	}
-	
-	public static void notificarSaldoBaixo(Long idConta) {
-		if (calcularSaldo(idConta) < 100) {
-			System.out.println("Saldo Baixo: R$" + calcularSaldo(idConta));
-		}
-	}
-	
-	public static Double calcularSaquesDiarios(Long idConta, LocalDate dataTransacao) {
-		List<Movimentacao> transacoes = daoMovimentacao.listarExtratoDiarioConta(idConta, dataTransacao);
-		Double saques = 0.0;
-		for(Movimentacao movimentacao : transacoes) {
-			if (movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE && movimentacao.getDataTransacao().toLocalDate().equals(dataTransacao)) {
-				saques += movimentacao.getValorOperacao();
-			}
-		}
-		return saques;
-	}
 	
 	public static void aplicarTarifaOperacao(Movimentacao movimentacao) {
 		if (movimentacao.getTipoTransacao() == TransacaoTipo.PIX || movimentacao.getTipoTransacao() == TransacaoTipo.PAGAMENTO) {
 			movimentacao.setValorOperacao(movimentacao.getValorOperacao() + 5);
 		} else if (movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE) {
 			movimentacao.setValorOperacao(movimentacao.getValorOperacao() + 2);
-		}
-	}
-	
-	public static void aplicarCashback(Movimentacao movimentacao) {
-		if(movimentacao.getTipoTransacao() == TransacaoTipo.DEBITO_CARTAO) {
-			Double valorCashBack = movimentacao.getValorOperacao() * 0.002;
-			Conta conta = movimentacao.getConta();
-			conta.setCashBackAcumulado(conta.getCashBackAcumulado() + valorCashBack);
-			servicoConta.atualizarConta(conta);
+		} else if (movimentacao.getTipoTransacao() == TransacaoTipo.DEBITO_CARTAO) {
+			movimentacao.setCashback(movimentacao.getValorOperacao() * 0.002);
 		}
 	}
 	
@@ -187,6 +148,10 @@ public class MovimentacaoServico {
 	
 	public List<Movimentacao> listarExtratoPeriodicoConta(Long idConta, LocalDate dataInicial, LocalDate dataFinal) {
 		return daoMovimentacao.listarExtratoPeriodicoConta(idConta, dataInicial, dataFinal);
+	}
+	
+	public List<Movimentacao> listarPeriodicoPorTipoTransacao(Long idConta, TransacaoTipo tipoTransacao, LocalDate dataInicial, LocalDate dataFinal){
+		return daoMovimentacao.listarPeriodicoPorTipoTransacao(idConta, tipoTransacao, dataInicial, dataFinal);
 	}
 	
 	public Movimentacao buscarPorId(Long id) {

@@ -11,8 +11,8 @@ import util.Cpf;
 
 public class ClienteServico {
 	ClienteDAO daoCliente = new ClienteDAO();
-	ContaDAO daoConta = new ContaDAO();
-	MovimentacaoDAO daoMovimentacao = new MovimentacaoDAO();
+	ContaServico servicoConta = new ContaServico();
+	MovimentacaoServico servicoMovimentacao = new MovimentacaoServico();
 
 	public Cliente inserirCliente(Cliente cliente) {
 		if(verificarCamposNaoNulos(cliente) && Cpf.verificarCpf(cliente.getCpf())) {
@@ -32,8 +32,8 @@ public class ClienteServico {
 	
 	public void excluirCliente(Long idCliente) {
 		if(daoCliente.buscarPorId(idCliente) != null) {
-			daoMovimentacao.excluirPorCliente(idCliente);
-			daoConta.excluirPorCliente(idCliente);
+			servicoMovimentacao.excluirPorCliente(idCliente);
+			servicoConta.excluirPorCliente(idCliente);
 			daoCliente.excluirCliente(idCliente);
 		}
 	}

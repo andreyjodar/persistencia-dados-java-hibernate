@@ -27,7 +27,7 @@ public class MovimentacaoTela {
 		Movimentacao movimentacao = new Movimentacao(conta, TransacaoTipo.DEPOSITO, 4000.0, "Depósito de R$200 07/11/2024");
 		movimentacao = controleMovimentacao.inserirMovimentacao(movimentacao);
 		
-		Movimentacao movimentacao2 = new Movimentacao(controleConta.buscarPorId(1L), TransacaoTipo.DEPOSITO, 6000.0, "Depósito de R$200 07/11/2024");
+		Movimentacao movimentacao2 = new Movimentacao(controleConta.buscarPorId(1L), TransacaoTipo.DEPOSITO, 3000.0, "Depósito de R$200 07/11/2024");
 		movimentacao2 = controleMovimentacao.inserirMovimentacao(movimentacao2);
 		
 		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.buscarPorId(1L), TransacaoTipo.PIX, 300.0, "Teste"));
