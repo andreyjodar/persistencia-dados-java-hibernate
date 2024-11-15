@@ -18,9 +18,11 @@ public class ContaServico {
 	static ClienteServico servicoCliente = new ClienteServico(); 
 	
 	public Conta inserirConta(Conta conta) {
-		if(verificarCamposNaoNulos(conta) && daoConta.listarPorIdCliente(conta.getCliente().getId()).size() < 3) {
-			Conta contaValida = daoConta.inserirConta(conta);
-			return contaValida;
+		if(verificarCamposNaoNulos(conta)) {
+			if(daoConta.listarPorIdCliente(conta.getCliente().getId()).size() < 3) {
+				return daoConta.inserirConta(conta);
+			}
+			return null;
 		}
 		return null;
 	}

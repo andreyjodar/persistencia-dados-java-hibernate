@@ -16,7 +16,7 @@ public class MovimentacaoServico {
 	public Movimentacao inserirMovimentacao(Movimentacao movimentacao) {
 		if(verificarCamposNaoNulos(movimentacao)) {
 			aplicarTarifaOperacao(movimentacao);
-			if(verificarLimites(movimentacao)) {
+			if(verificarLimitesTransacao(movimentacao)) {
 				if(verificarSaldo(movimentacao)) {
 					Movimentacao movimentacaoBanco = daoMovimentacao.inserirMovimentacao(movimentacao);
 					return movimentacaoBanco;
@@ -44,7 +44,7 @@ public class MovimentacaoServico {
 		return daoMovimentacao.alterarMovimentacao(movimentacao);
 	}
 	
-	public static boolean verificarLimites(Movimentacao movimentacao) {
+	public static boolean verificarLimitesTransacao(Movimentacao movimentacao) {
 		if(daoMovimentacao.listarExtratoDiarioConta(movimentacao.getConta().getId(), movimentacao.getDataTransacao().toLocalDate()).size() >= 10) {
 			return false;
 		} else if (movimentacao.getTipoTransacao() == TransacaoTipo.PIX) {
@@ -53,7 +53,7 @@ public class MovimentacaoServico {
 			} 
 			return true;
 		} else if (movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE) {
-			if (servicoConta.calcularSaquePorDia(movimentacao.getConta().getId(), movimentacao.getDataTransacao().toLocalDate()) + movimentacao.getValorOperacao() >= 5000) {
+			if (servicoConta.calcularSaquePorDia(movimentacao.getConta().getId(), movimentacao.getDataTransacao().toLocalDate()) + movimentacao.getValorOperacao() > 5000) {
 				return false;
 			} 
 			return true;

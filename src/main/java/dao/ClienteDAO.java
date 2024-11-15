@@ -1,5 +1,6 @@
 package dao;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -14,7 +15,9 @@ public class ClienteDAO {
 	public Cliente inserirCliente(Cliente cliente) {
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
+		
 		em.persist(cliente);
+		
 		em.getTransaction().commit();
 		em.close();
 		return cliente;
@@ -43,10 +46,12 @@ public class ClienteDAO {
 	public void excluirCliente(Long idCliente) {
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
+		
 		Cliente clienteBanco = em.find(Cliente.class, idCliente);
 		if(clienteBanco != null) {
 			em.remove(clienteBanco);
 		}
+		
 		em.getTransaction().commit();
 		em.close();
 		
@@ -55,6 +60,7 @@ public class ClienteDAO {
 	public List<Cliente> listarTodosClientes() {
 		EntityManager em = emf.createEntityManager();
 		Query query = em.createQuery("from Cliente");
+		
 		List<Cliente> resultado = query.getResultList();
 		em.close();
 		return resultado;
@@ -63,9 +69,9 @@ public class ClienteDAO {
 	public Cliente buscarPorCpf(String cpf) {
 		EntityManager em = emf.createEntityManager();
 		try {
-			Query query = em.createQuery("from Cliente where cpf = " + cpf);
-			Cliente cliente = (Cliente) query.getSingleResult();
-			return cliente;
+			Query query = em.createQuery("from Cliente where cpf = :cpf");
+			query.setParameter("cpf", cpf);
+			return (Cliente) query.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		} finally {
@@ -82,7 +88,13 @@ public class ClienteDAO {
 	
 	public List<Cliente> listarPorPeriodoNascimento(LocalDate dataInicial, LocalDate dataFinal) {
 		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Cliente where FUNCTION('DATE', dataNascimento) >= " + dataInicial + " AND FUNCTION('DATE', dataNascimento) <= " + dataFinal);
+		Date sqlDataInicial = Date.valueOf(dataInicial);
+		Date sqlDataFinal = Date.valueOf(dataFinal);
+		
+		Query query = em.createQuery("from Cliente where function('DATE', dataNascimento) between :dataInicial and :dataFinal");
+		query.setParameter("dataInicial", sqlDataInicial);
+		query.setParameter("dataFinal", sqlDataFinal);
+		
 		List<Cliente> resultado = query.getResultList();
 		em.close();
 		return resultado;

@@ -1,7 +1,7 @@
 package dao;
 
 import java.util.List;
-
+import java.sql.Date;
 import java.time.*;
 import javax.persistence.*;
 
@@ -17,7 +17,9 @@ public class MovimentacaoDAO {
 	public Movimentacao inserirMovimentacao(Movimentacao movimentacao) {
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
+		
 		em.persist(movimentacao);
+		
 		em.getTransaction().commit();
 		em.close();
 		return movimentacao;
@@ -30,7 +32,6 @@ public class MovimentacaoDAO {
 			em.getTransaction().begin();
 
 			contaBanco = buscarPorId(conta.getId());
-
 			if (contaBanco != null) {
 				contaBanco.setDescricao(conta.getDescricao());
 				em.merge(contaBanco);
@@ -45,10 +46,12 @@ public class MovimentacaoDAO {
 	public void excluirMovimentacao(Long idMovimentacao) {
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
+		
 		Movimentacao movimentacao = em.find(Movimentacao.class, idMovimentacao);
 		if (movimentacao != null) {
 			em.remove(movimentacao);
 		}
+		
 		em.getTransaction().commit();
 		em.close();
 	}
@@ -56,8 +59,11 @@ public class MovimentacaoDAO {
 	public void excluirPorConta(Long idConta) {
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
-		Query query = em.createQuery("delete from Movimentacao m where m.conta.id = " + idConta);
+		
+		Query query = em.createQuery("delete from Movimentacao m where m.conta.id = :idConta");
+		query.setParameter("idConta", idConta);
 		query.executeUpdate();
+		
 		em.getTransaction().commit();
 		em.close();
 	}
@@ -65,8 +71,11 @@ public class MovimentacaoDAO {
 	public void excluirPorCliente(Long idCliente) {
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
-		Query query = em.createQuery("delete from Movimentacao m where m.conta.id in (select c.id from Conta c where c.cliente.id = " + idCliente + ")");
+		
+		Query query = em.createQuery("delete from Movimentacao m where m.conta.id in (select c.id from Conta c where c.cliente.id = :idCliente)");
+		query.setParameter("idCliente", idCliente);
 		query.executeUpdate();
+		
 		em.getTransaction().commit();
 		em.close();
 	}
@@ -74,14 +83,17 @@ public class MovimentacaoDAO {
 	public List<Movimentacao> listarTodos() {
 		EntityManager em = emf.createEntityManager();
 		Query query = em.createQuery("from Movimentacao");
+		
 		List<Movimentacao> resultado = query.getResultList();
 		em.close();
 		return resultado;
 	}
 	
-	public List<Movimentacao> listarPorTipoTransacao(String tipoTransacao) {
+	public List<Movimentacao> listarPorTipoTransacao(TransacaoTipo tipoTransacao) {
 		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Movimentacao where tipoTransacao='" + tipoTransacao + "'");
+		Query query = em.createQuery("from Movimentacao where tipoTransacao = :tipoTransacao");
+		query.setParameter("tipoTransacao", tipoTransacao);
+		
 		List<Movimentacao> resultado = query.getResultList();
 		em.close();
 		return resultado; 
@@ -89,7 +101,9 @@ public class MovimentacaoDAO {
 
 	public List<Movimentacao> listarPorCliente(Long idCliente) {
 		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Movimentacao m where m.conta.cliente.id=" + idCliente);
+		Query query = em.createQuery("from Movimentacao m where m.conta.cliente.id = :idCliente");
+		query.setParameter("idCliente", idCliente);
+		
 		List<Movimentacao> resultado = query.getResultList();
 		em.close();
 		return resultado;
@@ -133,7 +147,14 @@ public class MovimentacaoDAO {
 	
 	public List<Movimentacao> listarExtratoPeriodicoCliente(Long idCliente, LocalDate dataInicial, LocalDate dataFinal) {
 		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Movimentacao m where function('DATE', m.dataTransacao) between " + dataInicial + " and " + dataFinal + " and m.conta.id in (select c.id from Conta c where c.cliente.id =" + idCliente +")");
+		Date sqlDataInicial = Date.valueOf(dataInicial);
+		Date sqlDataFinal = Date.valueOf(dataFinal);
+		
+		Query query = em.createQuery("from Movimentacao m where function('DATE', m.dataTransacao) between :dataInicial and :dataFinal and m.conta.id in (select c.id from Conta c where c.cliente.id = :idCliente)");
+		query.setParameter("idCliente", idCliente);
+		query.setParameter("dataInicial", sqlDataInicial);
+		query.setParameter("dataFinal", sqlDataFinal);
+		
 		List<Movimentacao> resultado = query.getResultList();
 		em.close();
 		return resultado;
@@ -141,7 +162,14 @@ public class MovimentacaoDAO {
 	
 	public List<Movimentacao> listarExtratoPeriodicoConta(Long idConta, LocalDate dataInicial, LocalDate dataFinal) {
 		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Movimentacao m where m.conta.id=" + idConta + " and function('DATE', m.dataTransacao) between "+ dataInicial + "and " + dataFinal);
+		Date sqlDataInicial = Date.valueOf(dataInicial);
+		Date sqlDataFinal = Date.valueOf(dataFinal);
+		
+		Query query = em.createQuery("from Movimentacao m where m.conta.id = :idConta and function('DATE', m.dataTransacao) between :dataInicial and :dataFinal");
+		query.setParameter("idConta", idConta);
+		query.setParameter("dataInicial", sqlDataInicial);
+		query.setParameter("dataFinal", sqlDataFinal);
+		
 		List<Movimentacao> resultado = query.getResultList();
 		em.close();
 		return resultado;
@@ -149,8 +177,14 @@ public class MovimentacaoDAO {
 	
 	public List<Movimentacao> listarPeriodicoPorTipoTransacao(Long idConta, TransacaoTipo tipoTransacao, LocalDate dataInicial, LocalDate dataFinal) {
 		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Movimentacao m where m.tipoTransacao = :tipoTransacao and m.conta.id=" + idConta + " and function('DATE', m.dataTransacao) between "+ dataInicial + "and " + dataFinal);
+		Date sqlDataInicial = Date.valueOf(dataInicial);
+		Date sqlDataFinal = Date.valueOf(dataFinal);
+		
+		Query query = em.createQuery("from Movimentacao m where m.tipoTransacao = :tipoTransacao and m.conta.id= :idConta and function('DATE', m.dataTransacao) between :dataInicial and :dataFinal");
+		query.setParameter("idConta", idConta);
 		query.setParameter("tipoTransacao", tipoTransacao);
+		query.setParameter("dataInicial", sqlDataInicial);
+		query.setParameter("dataFinal", sqlDataFinal);
 		List<Movimentacao> resultado = query.getResultList();
 		em.close();
 		return resultado;

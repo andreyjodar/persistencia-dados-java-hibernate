@@ -19,14 +19,13 @@ public class Conta {
 	private LocalDateTime dataAbertura;
 
 	public Conta() {
-
+		this.dataAbertura = LocalDateTime.now();
 	}
 	
-	public Conta(Cliente cliente, ContaTipo contaTipo, LocalDateTime dataAbertura) {
+	public Conta(Cliente cliente, ContaTipo contaTipo) {
 		this();
 		this.cliente = cliente;
 		this.contaTipo = contaTipo;
-		this.dataAbertura = dataAbertura;
 	}
 	
 	public Long getId() {

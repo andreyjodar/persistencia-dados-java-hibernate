@@ -2,15 +2,15 @@ package util;
 
 public class Cpf {
 	
-	public static boolean verificarCpf(String cpfCorrentista) {
-		if(cpfCorrentista.length() != 11) {
+	public static boolean verificarCpf(String cpf) {
+		if(cpf.length() != 11 || cpf.chars().distinct().count() == 1) {
 			return false;
 		}
 		
-		String numBase = cpfCorrentista.substring(0,9);
+		String numBase = cpf.substring(0,9);
 		int primeiroDigito = calcularDigitoVerificador(numBase, 10);
 		int segundoDigito = calcularDigitoVerificador(numBase + primeiroDigito, 11);
-		return cpfCorrentista.equals(numBase + primeiroDigito + segundoDigito);
+		return cpf.equals(numBase + primeiroDigito + segundoDigito);
 	}
 	
 	public static int calcularDigitoVerificador(String numBase, int pesoInicial) {

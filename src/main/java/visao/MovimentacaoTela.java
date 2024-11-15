@@ -1,15 +1,8 @@
 package visao;
 
 import java.time.*;
-
-import controle.ClienteControle;
-import controle.ContaControle;
-import controle.MovimentacaoControle;
-import entidade.Cliente;
-import entidade.Conta;
-import entidade.ContaTipo;
-import entidade.Movimentacao;
-import entidade.TransacaoTipo;
+import controle.*;
+import entidade.*;
 
 public class MovimentacaoTela {
 
@@ -18,25 +11,42 @@ public class MovimentacaoTela {
 		ContaControle controleConta = new ContaControle();	
 		MovimentacaoControle controleMovimentacao = new MovimentacaoControle();
 		
-		Cliente cliente = new Cliente("Andrey Vinícius Jodar", "10162344902", LocalDate.parse("2005-10-14"));
-		cliente = controleCliente.inserirCliente(cliente);
+		/* Terminar
+		 *   - Análise de Fraude
+		 *   - Análise de Crédito e Empréstimo
+		 *   - Conexão DAO-Servico-Controle
+		 * Validar
+		 *   - Lógica com LocalDate.now()
+		 *   - Diagrama de Classes
+		 *   - Métodos de Cashback
+		 * */
 		
-		Conta conta = new Conta(cliente, ContaTipo.CONTA_CORRENTE, LocalDateTime.now());
-		conta = controleConta.inserirConta(conta);
+		controleCliente.inserirCliente(new Cliente("Andrey Vinícius Jodar", "10162344902", LocalDate.parse("2005-10-14")));
+		controleCliente.inserirCliente(new Cliente("Carlinhos Jurandir", "11111111111", LocalDate.parse("2000-07-24")));
+		controleCliente.inserirCliente(new Cliente("Darleide Santos", "76664333953", LocalDate.parse("1998-03-01")));
+		controleCliente.inserirCliente(new Cliente("Gisele Menezes", "76664333953", LocalDate.parse("1980-02-28")));
 		
-		Movimentacao movimentacao = new Movimentacao(conta, TransacaoTipo.DEPOSITO, 4000.0, "Depósito de R$200 07/11/2024");
-		movimentacao = controleMovimentacao.inserirMovimentacao(movimentacao);
-		
-		Movimentacao movimentacao2 = new Movimentacao(controleConta.buscarPorId(1L), TransacaoTipo.DEPOSITO, 3000.0, "Depósito de R$200 07/11/2024");
-		movimentacao2 = controleMovimentacao.inserirMovimentacao(movimentacao2);
-		
-		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.buscarPorId(1L), TransacaoTipo.PIX, 300.0, "Teste"));
-		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.buscarPorId(1L), TransacaoTipo.PIX, 200.0, "Teste"));
-		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.buscarPorId(1L), TransacaoTipo.DEBITO_CARTAO, 3000.0, "Teste"));
-		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.buscarPorId(1L), TransacaoTipo.PAGAMENTO, 300.0, "Teste"));
-		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.buscarPorId(1L), TransacaoTipo.SAQUE, 4000.0, "Teste"));
-		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.buscarPorId(1L), TransacaoTipo.SAQUE, 1000.0, "Teste"));
-		
+		controleConta.inserirConta(new Conta(controleCliente.getClientePorId(1L), ContaTipo.CONTA_CORRENTE));
+		controleConta.inserirConta(new Conta(controleCliente.getClientePorId(1L), ContaTipo.CONTA_POUPANCA));
+		controleConta.inserirConta(new Conta(controleCliente.getClientePorId(1L), ContaTipo.CONTA_CORRENTE));
+		controleConta.inserirConta(new Conta(controleCliente.getClientePorId(1L), ContaTipo.CONTA_POUPANCA));
+
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.DEPOSITO, 10000.0, "Depósito R$ 10000,00"));
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.PIX, 3000.0, "Pix R$ 3000,00"));
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.PIX, 200.0, "Pix R$ 200,00"));
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.PAGAMENTO, 1000.0, "Pagamento R$ 1000,00"));
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.SAQUE, 3000.0, "Saque R$ 3000,00"));
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.SAQUE, 3000.0, "Saque R$ 3000,00"));
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.DEBITO_CARTAO, 1000.0, "Débito R$ 1000,00"));
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.DEBITO_CARTAO, 1500.0, "Débito R$ 1500,00"));
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.PAGAMENTO, 1500.0, "Pagamento R$ 1500,00"));
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.PAGAMENTO, 3000.0, "Pagamento R$ 3000,00"));
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.SAQUE, 1000.0, "Pagamento R$ 1000,00"));
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.PAGAMENTO, 1500.0, "Pagamento R$ 1500,00"));
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.DEPOSITO, 4000.0, "Depósito R$ 4000,00"));
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.DEPOSITO, 5000.0, "Depósito R$ 5000,00"));
+		controleMovimentacao.inserirMovimentacao(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.DEPOSITO, 6000.0, "Depósito R$ 6000,00"));
+
 	}
 
 }
