@@ -4,8 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import dao.ClienteDAO;
-import dao.ContaDAO;
-import dao.MovimentacaoDAO;
 import entidade.Cliente;
 import util.Cpf;
 
@@ -18,8 +16,7 @@ public class ClienteServico {
 		if(verificarCamposNaoNulos(cliente) && Cpf.verificarCpf(cliente.getCpf())) {
 			Cliente clienteInsercao = daoCliente.buscarPorCpf(cliente.getCpf());
 			if(clienteInsercao == null) {
-				clienteInsercao = daoCliente.inserirCliente(cliente);
-				return clienteInsercao;
+				return daoCliente.inserirCliente(cliente);
 			}
 			return null;
 		} 
@@ -42,12 +39,8 @@ public class ClienteServico {
 		return cliente.getCpf() != null && cliente.getNome() != null && cliente.getDataNascimento() != null;
 	}
 	
-	public List<Cliente> listarTodosClientes() {
-		return daoCliente.listarTodosClientes();
-	}
-	
-	public List<Cliente> listarPorPeriodoNascimento(LocalDate dataInicial, LocalDate dataFinal){
-		return daoCliente.listarPorPeriodoNascimento(dataInicial, dataFinal);
+	public Cliente buscarPorId(Long idCliente) {
+		return daoCliente.buscarPorId(idCliente);
 	}
 	
 	public Cliente buscarPorCpf(String cpf) {
@@ -57,7 +50,12 @@ public class ClienteServico {
 		return null;
 	}
 	
-	public Cliente buscarPorId(Long idCliente) {
-		return daoCliente.buscarPorId(idCliente);
+	public List<Cliente> listarTodosClientes() {
+		return daoCliente.listarTodosClientes();
 	}
+	
+	public List<Cliente> listarPorPeriodoNascimento(LocalDate dataInicial, LocalDate dataFinal){
+		return daoCliente.listarPorPeriodoNascimento(dataInicial, dataFinal);
+	}
+
 }

@@ -30,8 +30,8 @@ public class ContaControle {
 		return servicoConta.listarTodasContas();
 	}
 	
-	public List<Conta> getContasPorIdCliente(Long idCliente) {
-		return servicoConta.listarPorIdCliente(idCliente);
+	public List<Conta> getContasPorCliente(Long idCliente) {
+		return servicoConta.listarPorCliente(idCliente);
 	}
 	
 	public List<Conta> getContasPorTipoConta(ContaTipo contaTipo) {

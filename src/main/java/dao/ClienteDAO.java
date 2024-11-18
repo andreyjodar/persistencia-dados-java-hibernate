@@ -4,7 +4,11 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import entidade.Cliente;
 
@@ -57,13 +61,11 @@ public class ClienteDAO {
 		
 	}
 	
-	public List<Cliente> listarTodosClientes() {
+	public Cliente buscarPorId(Long idCliente) {
 		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Cliente");
-		
-		List<Cliente> resultado = query.getResultList();
+		Cliente cliente = em.find(Cliente.class, idCliente);
 		em.close();
-		return resultado;
+		return cliente;
 	}
 	
 	public Cliente buscarPorCpf(String cpf) {
@@ -79,11 +81,13 @@ public class ClienteDAO {
 		}
 	}
 	
-	public Cliente buscarPorId(Long idCliente) {
+	public List<Cliente> listarTodosClientes() {
 		EntityManager em = emf.createEntityManager();
-		Cliente cliente = em.find(Cliente.class, idCliente);
+		Query query = em.createQuery("from Cliente");
+		
+		List<Cliente> resultado = query.getResultList();
 		em.close();
-		return cliente;
+		return resultado;
 	}
 	
 	public List<Cliente> listarPorPeriodoNascimento(LocalDate dataInicial, LocalDate dataFinal) {

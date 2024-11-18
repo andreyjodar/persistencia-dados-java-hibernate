@@ -22,6 +22,14 @@ public class ClienteControle {
 		servicoCliente.excluirCliente(idCliente);
 	}
 	
+	public Cliente getClientePorId(Long idCliente) {
+		return servicoCliente.buscarPorId(idCliente);
+	}
+	
+	public Cliente getClientePorCpf(String cpf) {
+		return servicoCliente.buscarPorCpf(cpf);
+	}
+	
 	public List<Cliente> getTodosClientes() {
 		return servicoCliente.listarTodosClientes();
 	}
@@ -29,12 +37,5 @@ public class ClienteControle {
 	public List<Cliente> getClientesPorIntervaloNascimento(LocalDate dataInicial, LocalDate dataFinal){
 		return servicoCliente.listarPorPeriodoNascimento(dataInicial, dataFinal);
 	}
-	
-	public Cliente getClientePorCpf(String cpf) {
-		return servicoCliente.buscarPorCpf(cpf);
-	}
-	
-	public Cliente getClientePorId(Long idCliente) {
-		return servicoCliente.buscarPorId(idCliente);
-	}
+
 }

@@ -2,17 +2,19 @@ package dao;
 
 import java.util.List;
 import java.sql.Date;
-import java.time.*;
-import javax.persistence.*;
+import java.time.LocalDate;
 
-import entidade.Conta;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
+
 import entidade.Movimentacao;
 import entidade.TransacaoTipo;
 
 public class MovimentacaoDAO {
 
 	EntityManagerFactory emf = Persistence.createEntityManagerFactory("bancoPU");
-	ContaDAO daoConta = new ContaDAO();
 
 	public Movimentacao inserirMovimentacao(Movimentacao movimentacao) {
 		EntityManager em = emf.createEntityManager();
@@ -79,6 +81,13 @@ public class MovimentacaoDAO {
 		em.getTransaction().commit();
 		em.close();
 	}
+	
+	public Movimentacao buscarPorId(Long id) {
+		EntityManager em = emf.createEntityManager();
+		Movimentacao conta = em.find(Movimentacao.class, id);
+		em.close();
+		return conta;
+	}
 
 	public List<Movimentacao> listarTodos() {
 		EntityManager em = emf.createEntityManager();
@@ -98,10 +107,22 @@ public class MovimentacaoDAO {
 		em.close();
 		return resultado; 
 	}
+	
+	public List<Movimentacao> listarPorDataTransacao(LocalDate dataTransacao) {
+		EntityManager em = emf.createEntityManager();
+		Date sqlDataTransacao = Date.valueOf(dataTransacao);
+		
+		Query query = em.createQuery("from Movimentacao m where function('DATE', dataTransacao) = :dataTransacao");
+		query.setParameter("dataTransacao", sqlDataTransacao);
+		
+		List<Movimentacao> resultado = query.getResultList();
+		em.close();
+		return resultado;
+	}
 
 	public List<Movimentacao> listarPorCliente(Long idCliente) {
 		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Movimentacao m where m.conta.cliente.id = :idCliente");
+		Query query = em.createQuery("from Movimentacao m where m.conta.id in (select c.id from Conta c where c.cliente.id = :idCliente)");
 		query.setParameter("idCliente", idCliente);
 		
 		List<Movimentacao> resultado = query.getResultList();
@@ -111,15 +132,9 @@ public class MovimentacaoDAO {
 	
 	public List<Movimentacao> listarPorConta(Long idConta) {
 		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Movimentacao m where m.conta.id = " + idConta);
-		List<Movimentacao> resultado = query.getResultList();
-		em.close();
-		return resultado;
-	}
-	
-	public List<Movimentacao> listarPorDataTransacao(LocalDate dataTransacao) {
-		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Movimentacao where FUNCTION('DATE', dataTransacao) = " + dataTransacao);
+		Query query = em.createQuery("from Movimentacao m where m.conta.id = :idConta");
+		query.setParameter("idConta", idConta);
+		
 		List<Movimentacao> resultado = query.getResultList();
 		em.close();
 		return resultado;
@@ -185,16 +200,10 @@ public class MovimentacaoDAO {
 		query.setParameter("tipoTransacao", tipoTransacao);
 		query.setParameter("dataInicial", sqlDataInicial);
 		query.setParameter("dataFinal", sqlDataFinal);
+		
 		List<Movimentacao> resultado = query.getResultList();
 		em.close();
 		return resultado;
-	}
-
-	public Movimentacao buscarPorId(Long id) {
-		EntityManager em = emf.createEntityManager();
-		Movimentacao conta = em.find(Movimentacao.class, id);
-		em.close();
-		return conta;
 	}
 	
 }

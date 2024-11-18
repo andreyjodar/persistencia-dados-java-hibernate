@@ -1,6 +1,6 @@
 package controle;
 
-import java.time.*;
+import java.time.LocalDate;
 import java.util.List;
 
 import entidade.Movimentacao;
@@ -30,40 +30,40 @@ public class MovimentacaoControle {
 		return servicoMovimentacao.alterarMovimentacao(movimentacao);
 	}
 	
-	public List<Movimentacao> listarTodos() {
+	public Movimentacao getMovimentacaoPorId(Long idMovimentacao) {
+		return servicoMovimentacao.buscarPorId(idMovimentacao);
+	}
+	
+	public List<Movimentacao> getTodasMovimentacoes() {
 		return servicoMovimentacao.listarTodos();
 	}
 	
-	public List<Movimentacao> listarPorCliente(Long idCliente) {
+	public List<Movimentacao> getMovimentacoesPorCliente(Long idCliente) {
 		return servicoMovimentacao.listarPorCliente(idCliente);
 	}
 	
-	public List<Movimentacao> listarPorConta(Long idConta) {
+	public List<Movimentacao> getMovimentacoesPorConta(Long idConta) {
 		return servicoMovimentacao.listarPorConta(idConta);
 	}
 	
-	public List<Movimentacao> listarPorDataTransacao(LocalDate dataTransacao) {
+	public List<Movimentacao> getMovimentacoesPorDataTransacao(LocalDate dataTransacao) {
 		return servicoMovimentacao.listarPorDataTransacao(dataTransacao);
 	}
 	
-	public List<Movimentacao> listarExtratoMensalConta(Long idConta, int mes, int ano) {
+	public List<Movimentacao> getExtratoMensalPorConta(Long idConta, int mes, int ano) {
 		return servicoMovimentacao.listarExtratoMensalConta(idConta, mes, ano);
 	}
 	
-	public List<Movimentacao> listarExtratoMensalCliente(Long idCliente, int mes, int ano) {
+	public List<Movimentacao> getExtratoMensalPorCliente(Long idCliente, int mes, int ano) {
 		return servicoMovimentacao.listarExtratoMensalCliente(idCliente, mes, ano);
 	}
 	
-	public List<Movimentacao> listarExtratoPeriodicoConta(Long idConta, LocalDate dataInicial, LocalDate dataFinal) {
+	public List<Movimentacao> getExtratoPeriodicoPorConta(Long idConta, LocalDate dataInicial, LocalDate dataFinal) {
 		return servicoMovimentacao.listarExtratoPeriodicoConta(idConta, dataInicial, dataFinal);
 	}
 	
-	public List<Movimentacao> listarExtratoPeriodicoCliente(Long idCliente, LocalDate dataInicial, LocalDate dataFinal) {
+	public List<Movimentacao> getExtratoPeriodicoPorCliente(Long idCliente, LocalDate dataInicial, LocalDate dataFinal) {
 		return servicoMovimentacao.listarExtratoPeriodicoCliente(idCliente, dataInicial, dataFinal);
-	}
-	
-	public Movimentacao buscarPorId(Long id) {
-		return servicoMovimentacao.buscarPorId(id);
 	}
 
 }

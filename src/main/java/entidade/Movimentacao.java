@@ -1,7 +1,17 @@
 package entidade;
 
-import java.time.*;
-import javax.persistence.*;
+import java.time.LocalDateTime;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "movimentacao")
@@ -22,7 +32,7 @@ public class Movimentacao {
 	private LocalDateTime dataTransacao;
 	@Column(length = 150, name = "descricao", nullable = true)
 	private String descricao;
-	@Column(name = "cashback")
+	@Column(name = "cashback", nullable = false)
 	private Double cashback;
 	
 	public Movimentacao() {

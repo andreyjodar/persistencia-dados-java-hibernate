@@ -1,10 +1,10 @@
 package servico;
 
-import java.time.*;
+import java.time.LocalDate;
 import java.util.List;
 
 import dao.MovimentacaoDAO;
-import entidade.Conta;
+import entidade.ContaTipo;
 import entidade.Movimentacao;
 import entidade.TransacaoTipo;
 
@@ -12,14 +12,13 @@ public class MovimentacaoServico {
 	static MovimentacaoDAO daoMovimentacao = new MovimentacaoDAO();
 	static ContaServico servicoConta = new ContaServico();
 	
-	// Verificar Fraude
 	public Movimentacao inserirMovimentacao(Movimentacao movimentacao) {
 		if(verificarCamposNaoNulos(movimentacao)) {
 			aplicarTarifaOperacao(movimentacao);
 			if(verificarLimitesTransacao(movimentacao)) {
 				if(verificarSaldo(movimentacao)) {
-					Movimentacao movimentacaoBanco = daoMovimentacao.inserirMovimentacao(movimentacao);
-					return movimentacaoBanco;
+					// if(verificarFraude(movimentacao)) ==> Implementar
+					return daoMovimentacao.inserirMovimentacao(movimentacao);
 				} 
 				return null;
 			} 
@@ -44,25 +43,71 @@ public class MovimentacaoServico {
 		return daoMovimentacao.alterarMovimentacao(movimentacao);
 	}
 	
+	public static boolean verificarCamposNaoNulos(Movimentacao movimentacao) {
+		return movimentacao.getConta() != null && movimentacao.getConta().getId() != null && movimentacao.getDataTransacao() != null && movimentacao.getTipoTransacao() != null && movimentacao.getValorOperacao() != null;
+	}
+	
+	public static void aplicarTarifaOperacao(Movimentacao movimentacao) {
+		if (movimentacao.getTipoTransacao() == TransacaoTipo.PIX || movimentacao.getTipoTransacao() == TransacaoTipo.PAGAMENTO) {
+			movimentacao.setValorOperacao(movimentacao.getValorOperacao() + 5);
+		} else if (movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE) {
+			movimentacao.setValorOperacao(movimentacao.getValorOperacao() + 2);
+		} else if (movimentacao.getTipoTransacao() == TransacaoTipo.DEBITO_CARTAO) {
+			movimentacao.setCashback(movimentacao.getValorOperacao() * 0.002);
+		}
+	}
+	
 	public static boolean verificarLimitesTransacao(Movimentacao movimentacao) {
 		if(daoMovimentacao.listarExtratoDiarioConta(movimentacao.getConta().getId(), movimentacao.getDataTransacao().toLocalDate()).size() >= 10) {
 			return false;
-		} else if (movimentacao.getTipoTransacao() == TransacaoTipo.PIX) {
-			if (movimentacao.getValorOperacao() > 300 || movimentacao.getDataTransacao().getHour() > 22 || movimentacao.getDataTransacao().getHour() < 6) {
+		} else if(movimentacao.getConta().getContaTipo() == ContaTipo.CONTA_CORRENTE) {
+			if(movimentacao.getTipoTransacao() == TransacaoTipo.PIX) {
+				if(movimentacao.getValorOperacao() > 300 || movimentacao.getDataTransacao().getHour() > 21 || movimentacao.getDataTransacao().getHour() < 6) {
+					return false;
+				}
+				return true;
+			} else if(movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE) {
+				if(servicoConta.calcularSaquePorDia(movimentacao.getConta().getId(), movimentacao.getDataTransacao().toLocalDate()) + movimentacao.getValorOperacao() > 5000) {
+					return false;
+				}
+				return true;
+			} else if(movimentacao.getTipoTransacao() == TransacaoTipo.EMPRESTIMO) {
+				if(verificarLimiteCredito(movimentacao.getConta().getId(), movimentacao.getValorOperacao())) {
+					return true;
+				}
 				return false;
-			} 
-			return true;
-		} else if (movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE) {
-			if (servicoConta.calcularSaquePorDia(movimentacao.getConta().getId(), movimentacao.getDataTransacao().toLocalDate()) + movimentacao.getValorOperacao() > 5000) {
+			} else {
+				return true;
+			}
+		} else {
+			if(movimentacao.getTipoTransacao() == TransacaoTipo.DEPOSITO) {
+				return true;
+			} else if(movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE) {
+				if(servicoConta.calcularSaquePorDia(movimentacao.getConta().getId(), movimentacao.getDataTransacao().toLocalDate()) + movimentacao.getValorOperacao() > 3000) {
+					return false;
+				}
+				return true;
+			} else if(movimentacao.getTipoTransacao() == TransacaoTipo.PAGAMENTO || movimentacao.getTipoTransacao() == TransacaoTipo.DEBITO_CARTAO) {
+				if(movimentacao.getValorOperacao() > 1500) {
+					return false;
+				}
+				return true;
+			} else {
 				return false;
-			} 
+			}
+		}
+	}
+	
+	public static boolean verificarLimiteCredito(Long idConta, Double valorMovimentacao) {
+		Double limiteCredito = servicoConta.calcularLimiteCredito(idConta);
+		if(valorMovimentacao <= limiteCredito) {
 			return true;
-		} 
-		return true;
+		}
+		return false;
 	}
 
 	public static boolean verificarSaldo(Movimentacao movimentacao) {
-		if(movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE || movimentacao.getTipoTransacao() == TransacaoTipo.PIX || movimentacao.getTipoTransacao() == TransacaoTipo.PAGAMENTO) {
+		if(movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE || movimentacao.getTipoTransacao() == TransacaoTipo.PIX || movimentacao.getTipoTransacao() == TransacaoTipo.PAGAMENTO || movimentacao.getTipoTransacao() == TransacaoTipo.DEBITO_CARTAO) {
 			if (servicoConta.calcularSaldo(movimentacao.getConta().getId()) >= movimentacao.getValorOperacao()) {
 				return true;
 			} else {
@@ -73,16 +118,12 @@ public class MovimentacaoServico {
 
 	}
 	
-	public static boolean verificarCamposNaoNulos(Movimentacao movimentacao) {
-		return movimentacao.getConta() != null && movimentacao.getConta().getId() != null && movimentacao.getDataTransacao() != null && movimentacao.getTipoTransacao() != null && movimentacao.getValorOperacao() != null;
-	}
-	
 	// Definir verificação de Fraude
 	public boolean verificarFraude(Movimentacao movimentacao) {
 		List<Movimentacao> transacoes = listarPorCliente(movimentacao.getConta().getCliente().getId());
 		Double somaSaida = 0.0;
 		int numeroSaidas = 0;
-		if(transacoes == null) { 
+		if(transacoes == null || transacoes.isEmpty()) { 
 			return true;
 		}
 		for (Movimentacao movimento : transacoes) {
@@ -100,18 +141,20 @@ public class MovimentacaoServico {
 		return false;
 	}
 	
-	public static void aplicarTarifaOperacao(Movimentacao movimentacao) {
-		if (movimentacao.getTipoTransacao() == TransacaoTipo.PIX || movimentacao.getTipoTransacao() == TransacaoTipo.PAGAMENTO) {
-			movimentacao.setValorOperacao(movimentacao.getValorOperacao() + 5);
-		} else if (movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE) {
-			movimentacao.setValorOperacao(movimentacao.getValorOperacao() + 2);
-		} else if (movimentacao.getTipoTransacao() == TransacaoTipo.DEBITO_CARTAO) {
-			movimentacao.setCashback(movimentacao.getValorOperacao() * 0.002);
-		}
+	public Movimentacao buscarPorId(Long id) {
+		return daoMovimentacao.buscarPorId(id);
 	}
 	
 	public List<Movimentacao> listarTodos() {
 		return daoMovimentacao.listarTodos();
+	}
+	
+	public List<Movimentacao> listarPorTipoTransacao(TransacaoTipo tipoTransacao) {
+		return daoMovimentacao.listarPorTipoTransacao(tipoTransacao);
+	}
+	
+	public List<Movimentacao> listarPorDataTransacao(LocalDate dataTransacao) {
+		return daoMovimentacao.listarPorDataTransacao(dataTransacao);
 	}
 	
 	public List<Movimentacao> listarPorCliente(Long idCliente) {
@@ -120,10 +163,6 @@ public class MovimentacaoServico {
 	
 	public List<Movimentacao> listarPorConta(Long idConta) {
 		return daoMovimentacao.listarPorConta(idConta);
-	}
-	
-	public List<Movimentacao> listarPorDataTransacao(LocalDate dataTransacao) {
-		return daoMovimentacao.listarPorDataTransacao(dataTransacao);
 	}
 	
 	public List<Movimentacao> listarExtratoDiarioCliente(Long idCliente, LocalDate dataTransacao) {
@@ -154,7 +193,4 @@ public class MovimentacaoServico {
 		return daoMovimentacao.listarPeriodicoPorTipoTransacao(idConta, tipoTransacao, dataInicial, dataFinal);
 	}
 	
-	public Movimentacao buscarPorId(Long id) {
-		return daoMovimentacao.buscarPorId(id);
-	}
 }

@@ -71,6 +71,13 @@ public class ContaDAO {
 		em.close();
 	}
 	
+	public Conta buscarPorId(Long idConta) {
+		EntityManager em = emf.createEntityManager();
+		Conta conta = em.find(Conta.class, idConta);
+		em.close();
+		return conta;
+	}
+	
 	public List<Conta> listarTodasContas() {
 		EntityManager em = emf.createEntityManager();
 		Query query = em.createQuery("from Conta");
@@ -80,7 +87,7 @@ public class ContaDAO {
 		return resultado;
 	}
 	
-	public List<Conta> listarPorIdCliente(Long idCliente) {
+	public List<Conta> listarPorCliente(Long idCliente) {
 		EntityManager em = emf.createEntityManager();
 		Query query = em.createQuery("from Conta where cliente.id = :idCliente");
 		query.setParameter("idCliente", idCliente);
@@ -112,13 +119,6 @@ public class ContaDAO {
 		List<Conta> resultado = query.getResultList();
 		em.close();
 		return resultado;
-	}
-	
-	public Conta buscarPorId(Long idConta) {
-		EntityManager em = emf.createEntityManager();
-		Conta conta = em.find(Conta.class, idConta);
-		em.close();
-		return conta;
 	}
 	
 }
