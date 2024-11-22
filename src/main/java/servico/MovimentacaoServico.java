@@ -17,8 +17,10 @@ public class MovimentacaoServico {
 			aplicarTarifaOperacao(movimentacao);
 			if(verificarLimitesTransacao(movimentacao)) {
 				if(verificarSaldo(movimentacao)) {
-					// if(verificarFraude(movimentacao)) ==> Implementar
-					return daoMovimentacao.inserirMovimentacao(movimentacao);
+					if(verificarFraude(movimentacao)) {
+						return daoMovimentacao.inserirMovimentacao(movimentacao);
+					}
+					return null;
 				} 
 				return null;
 			} 
@@ -120,25 +122,43 @@ public class MovimentacaoServico {
 	
 	// Definir verificação de Fraude
 	public boolean verificarFraude(Movimentacao movimentacao) {
-		List<Movimentacao> transacoes = listarPorCliente(movimentacao.getConta().getCliente().getId());
-		Double somaSaida = 0.0;
-		int numeroSaidas = 0;
-		if(transacoes == null || transacoes.isEmpty()) { 
-			return true;
+		LocalDate dataTransacao = movimentacao.getDataTransacao().toLocalDate();
+		LocalDate fimUltimoMes = dataTransacao.minusMonths(1).withDayOfMonth(dataTransacao.minusMonths(1).lengthOfMonth());
+		LocalDate inicioUltimoMes = fimUltimoMes.withDayOfMonth(1);
+		LocalDate fimPenultimoMes = fimUltimoMes.minusMonths(1).withDayOfMonth(fimUltimoMes.minusMonths(1).lengthOfMonth());
+		LocalDate inicioPenultimoMes = fimPenultimoMes.withDayOfMonth(1);
+		
+		Double saldoUltimoMes = servicoConta.calcularSaldo(movimentacao.getConta().getId(), fimUltimoMes);
+		Double saldoPenultimoMes = servicoConta.calcularSaldo(movimentacao.getConta().getId(), fimPenultimoMes);
+
+		Double diferencaSaldo = Math.abs(saldoUltimoMes - saldoPenultimoMes);
+		Double limiteDiferenca = saldoPenultimoMes * 0.3;
+		if(saldoPenultimoMes != 0 && diferencaSaldo > limiteDiferenca) {
+			return false;
+		} 
+		
+	    Double mediaTransacoesUltimoMes = calcularMediaPorTipoTransacao(movimentacao.getConta().getId(), movimentacao.getTipoTransacao(), inicioUltimoMes, fimUltimoMes);
+	    Double mediaTransacoesPenultimoMes = calcularMediaPorTipoTransacao(movimentacao.getConta().getId(), movimentacao.getTipoTransacao(), inicioPenultimoMes, fimPenultimoMes);
+	    Double diferencaMedia = Math.abs(mediaTransacoesUltimoMes - mediaTransacoesPenultimoMes);
+	    Double limiteDiferencaMedia = 0.5 * mediaTransacoesPenultimoMes; 
+	    if (movimentacao.getTipoTransacao() == TransacaoTipo.DEPOSITO || movimentacao.getTipoTransacao() == TransacaoTipo.PIX) {
+	    	return true;
+	    } else if (mediaTransacoesPenultimoMes != 0 && (diferencaMedia < limiteDiferencaMedia || movimentacao.getValorOperacao() > mediaTransacoesUltimoMes * 2)) {
+	        return false;
+	    }
+	    return true;
+	}
+	
+	public static Double calcularMediaPorTipoTransacao(Long idConta, TransacaoTipo tipoTransacao, LocalDate dataInicial, LocalDate dataFinal) {
+		List<Movimentacao> transacoes = daoMovimentacao.listarPeriodicoPorTipoTransacao(idConta, tipoTransacao, dataInicial, dataFinal);
+		if (transacoes.isEmpty()) {
+			return 0.0;
 		}
-		for (Movimentacao movimento : transacoes) {
-			if(movimento.getTipoTransacao() == TransacaoTipo.SAQUE || movimento.getTipoTransacao() == TransacaoTipo.PIX || movimento.getTipoTransacao() == TransacaoTipo.PAGAMENTO) {
-				somaSaida += movimento.getValorOperacao();
-				numeroSaidas += 1;
-			} else {
-				
-			}
+		Double somaTransacoes = 0.0;
+		for (Movimentacao movimentacao : transacoes) {
+			somaTransacoes += movimentacao.getValorOperacao();
 		}
-		Double mediaSaidas = somaSaida/numeroSaidas;
-		if((movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE || movimentacao.getTipoTransacao() == TransacaoTipo.PIX || movimentacao.getTipoTransacao() == TransacaoTipo.PAGAMENTO) && movimentacao.getValorOperacao() > mediaSaidas * 2){
-			
-		}
-		return false;
+		return somaTransacoes / transacoes.size();
 	}
 	
 	public Movimentacao buscarPorId(Long id) {
