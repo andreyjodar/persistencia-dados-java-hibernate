@@ -8,17 +8,18 @@ import entidade.ContaTipo;
 import entidade.Movimentacao;
 import entidade.TransacaoTipo;
 
-public class MovimentacaoServico {
+public class MovimentacaoServico implements InterfaceServico<Movimentacao> {
 	static MovimentacaoDAO daoMovimentacao = new MovimentacaoDAO();
 	static ContaServico servicoConta = new ContaServico();
 	
-	public Movimentacao inserirMovimentacao(Movimentacao movimentacao) {
+	@Override
+	public Movimentacao inserir(Movimentacao movimentacao) {
 		if(verificarCamposNaoNulos(movimentacao)) {
 			aplicarTarifaOperacao(movimentacao);
 			if(verificarLimitesTransacao(movimentacao)) {
 				if(verificarSaldo(movimentacao)) {
 					if(verificarFraude(movimentacao)) {
-						return daoMovimentacao.inserirMovimentacao(movimentacao);
+						return daoMovimentacao.inserir(movimentacao);
 					}
 					return null;
 				} 
@@ -29,27 +30,28 @@ public class MovimentacaoServico {
 		return null;
 	}
 
-	public void excluirMovimentacao(Long idMovimentacao) {
-		daoMovimentacao.excluirMovimentacao(idMovimentacao);
+	@Override
+	public void excluir(Long idMovimentacao) {
+		daoMovimentacao.excluir(idMovimentacao);
 	}
-	
+
 	public void excluirPorConta(Long idConta) {
 		daoMovimentacao.excluirPorConta(idConta);
 	}
-	
+
 	public void excluirPorCliente(Long idCliente) {
 		daoMovimentacao.excluirPorCliente(idCliente);
 	}
-	
-	public Movimentacao alterarMovimentacao(Movimentacao movimentacao) {
-		return daoMovimentacao.alterarMovimentacao(movimentacao);
+
+	public Movimentacao alterar(Movimentacao movimentacao) {
+		return daoMovimentacao.alterar(movimentacao);
 	}
 	
-	public static boolean verificarCamposNaoNulos(Movimentacao movimentacao) {
+	private static boolean verificarCamposNaoNulos(Movimentacao movimentacao) {
 		return movimentacao.getConta() != null && movimentacao.getConta().getId() != null && movimentacao.getDataTransacao() != null && movimentacao.getTipoTransacao() != null && movimentacao.getValorOperacao() != null;
 	}
 	
-	public static void aplicarTarifaOperacao(Movimentacao movimentacao) {
+	private static void aplicarTarifaOperacao(Movimentacao movimentacao) {
 		if (movimentacao.getTipoTransacao() == TransacaoTipo.PIX || movimentacao.getTipoTransacao() == TransacaoTipo.PAGAMENTO) {
 			movimentacao.setValorOperacao(movimentacao.getValorOperacao() + 5);
 		} else if (movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE) {
@@ -59,7 +61,7 @@ public class MovimentacaoServico {
 		}
 	}
 	
-	public static boolean verificarLimitesTransacao(Movimentacao movimentacao) {
+	private static boolean verificarLimitesTransacao(Movimentacao movimentacao) {
 		if(daoMovimentacao.listarExtratoDiarioConta(movimentacao.getConta().getId(), movimentacao.getDataTransacao().toLocalDate()).size() >= 10) {
 			return false;
 		} else if(movimentacao.getConta().getContaTipo() == ContaTipo.CONTA_CORRENTE) {
@@ -100,7 +102,7 @@ public class MovimentacaoServico {
 		}
 	}
 	
-	public static boolean verificarLimiteCredito(Long idConta, Double valorMovimentacao) {
+	private static boolean verificarLimiteCredito(Long idConta, Double valorMovimentacao) {
 		Double limiteCredito = servicoConta.calcularLimiteCredito(idConta);
 		if(valorMovimentacao <= limiteCredito) {
 			return true;
@@ -108,7 +110,7 @@ public class MovimentacaoServico {
 		return false;
 	}
 
-	public static boolean verificarSaldo(Movimentacao movimentacao) {
+	private static boolean verificarSaldo(Movimentacao movimentacao) {
 		if(movimentacao.getTipoTransacao() == TransacaoTipo.SAQUE || movimentacao.getTipoTransacao() == TransacaoTipo.PIX || movimentacao.getTipoTransacao() == TransacaoTipo.PAGAMENTO || movimentacao.getTipoTransacao() == TransacaoTipo.DEBITO_CARTAO) {
 			if (servicoConta.calcularSaldo(movimentacao.getConta().getId()) >= movimentacao.getValorOperacao()) {
 				return true;
@@ -120,8 +122,7 @@ public class MovimentacaoServico {
 
 	}
 	
-	// Definir verificação de Fraude
-	public boolean verificarFraude(Movimentacao movimentacao) {
+	private static boolean verificarFraude(Movimentacao movimentacao) {
 		LocalDate dataTransacao = movimentacao.getDataTransacao().toLocalDate();
 		LocalDate fimUltimoMes = dataTransacao.minusMonths(1).withDayOfMonth(dataTransacao.minusMonths(1).lengthOfMonth());
 		LocalDate inicioUltimoMes = fimUltimoMes.withDayOfMonth(1);
@@ -149,7 +150,7 @@ public class MovimentacaoServico {
 	    return true;
 	}
 	
-	public static Double calcularMediaPorTipoTransacao(Long idConta, TransacaoTipo tipoTransacao, LocalDate dataInicial, LocalDate dataFinal) {
+	private static Double calcularMediaPorTipoTransacao(Long idConta, TransacaoTipo tipoTransacao, LocalDate dataInicial, LocalDate dataFinal) {
 		List<Movimentacao> transacoes = daoMovimentacao.listarPeriodicoPorTipoTransacao(idConta, tipoTransacao, dataInicial, dataFinal);
 		if (transacoes.isEmpty()) {
 			return 0.0;
@@ -161,42 +162,44 @@ public class MovimentacaoServico {
 		return somaTransacoes / transacoes.size();
 	}
 	
+	@Override
 	public Movimentacao buscarPorId(Long id) {
 		return daoMovimentacao.buscarPorId(id);
 	}
 	
+	@Override
 	public List<Movimentacao> listarTodos() {
 		return daoMovimentacao.listarTodos();
 	}
-	
+
 	public List<Movimentacao> listarPorTipoTransacao(TransacaoTipo tipoTransacao) {
 		return daoMovimentacao.listarPorTipoTransacao(tipoTransacao);
 	}
-	
+
 	public List<Movimentacao> listarPorDataTransacao(LocalDate dataTransacao) {
 		return daoMovimentacao.listarPorDataTransacao(dataTransacao);
 	}
-	
+
 	public List<Movimentacao> listarPorCliente(Long idCliente) {
 		return daoMovimentacao.listarPorCliente(idCliente);
 	}
-	
+
 	public List<Movimentacao> listarPorConta(Long idConta) {
 		return daoMovimentacao.listarPorConta(idConta);
 	}
-	
+
 	public List<Movimentacao> listarExtratoDiarioCliente(Long idCliente, LocalDate dataTransacao) {
 		return daoMovimentacao.listarExtratoDiarioCliente(idCliente, dataTransacao);
 	}
-	
+
 	public List<Movimentacao> listarExtratoDiarioConta(Long idConta, LocalDate dataTransacao) {
 		return daoMovimentacao.listarExtratoDiarioConta(idConta, dataTransacao);
 	}
-	
+
 	public List<Movimentacao> listarExtratoMensalCliente(Long idCliente, int mes, int ano) {
 		return daoMovimentacao.listarExtratoMensalCliente(idCliente, mes, ano);
 	}
-	
+
 	public List<Movimentacao> listarExtratoMensalConta(Long idConta, int mes, int ano) {
 		return daoMovimentacao.listarExtratoMensalConta(idConta, mes, ano);
 	}

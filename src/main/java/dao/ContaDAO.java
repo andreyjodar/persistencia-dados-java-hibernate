@@ -2,6 +2,7 @@ package dao;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -12,25 +13,17 @@ import javax.persistence.Query;
 import entidade.Conta;
 import entidade.ContaTipo;
 
-public class ContaDAO {
+public class ContaDAO extends GenericoDAO<Conta> {
 	
-	EntityManagerFactory emf = Persistence.createEntityManagerFactory("bancoPU");
-	
-	public Conta inserirConta(Conta conta) {
-		EntityManager em = emf.createEntityManager();
-		em.getTransaction().begin();
-		
-		em.persist(conta);
-		
-		em.getTransaction().commit();
-		em.close();
-		return conta;
+	public ContaDAO() {
+		super(Conta.class);
 	}
 	
-	public Conta alterarConta(Conta conta) {
+	@Override
+	public Conta alterar(Conta conta) {
+		EntityManager em = getEntityManager();
 		Conta contaBanco = null;
-		if(conta.getId() != null) {
-			EntityManager em = emf.createEntityManager();
+		try {
 			em.getTransaction().begin();
 			
 			contaBanco = em.find(Conta.class, conta.getId());
@@ -38,86 +31,75 @@ public class ContaDAO {
 				contaBanco.setContaTipo(conta.getContaTipo());
 				em.merge(contaBanco);
 			}
-			
 			em.getTransaction().commit();
+		}
+		finally {
 			em.close();
 		}
-		
 		return contaBanco;
 	}
 	
-	public void excluirConta(Long idConta) {
-		EntityManager em = emf.createEntityManager();
-		em.getTransaction().begin();
-		
-		Conta conta = em.find(Conta.class, idConta);
-		if(conta != null) {
-			em.remove(conta);
-		}
-		
-		em.getTransaction().commit();
-		em.close();
-	}
-	
 	public void excluirPorCliente(Long idCliente) {
-		EntityManager em = emf.createEntityManager();
-		em.getTransaction().begin();
-		
-		Query query = em.createQuery("delete from Conta where cliente.id = :idCliente");
-		query.setParameter("idCliente", idCliente);
-		
-		query.executeUpdate();
-		em.getTransaction().commit();
-		em.close();
-	}
-	
-	public Conta buscarPorId(Long idConta) {
-		EntityManager em = emf.createEntityManager();
-		Conta conta = em.find(Conta.class, idConta);
-		em.close();
-		return conta;
-	}
-	
-	public List<Conta> listarTodasContas() {
-		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Conta");
-		
-		List<Conta> resultado = query.getResultList();
-		em.close();
-		return resultado;
+		EntityManager em = getEntityManager();
+		try {
+			em.getTransaction().begin();
+			
+			Query query = em.createQuery("delete from Conta where cliente.id = :idCliente");
+			query.setParameter("idCliente", idCliente);
+			
+			query.executeUpdate();
+			em.getTransaction().commit();
+		}
+		finally {
+			em.close();
+		}
 	}
 	
 	public List<Conta> listarPorCliente(Long idCliente) {
-		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Conta where cliente.id = :idCliente");
-		query.setParameter("idCliente", idCliente);
-		
-		List<Conta> resultado = query.getResultList();
-		em.close();
+		EntityManager em = getEntityManager();
+		List<Conta> resultado = new ArrayList<>();
+		try {
+			Query query = em.createQuery("from Conta where cliente.id = :idCliente");
+			query.setParameter("idCliente", idCliente);
+			resultado = query.getResultList();
+		}
+		finally {
+			em.close();
+		}
 		return resultado;
 	}
 	
 	public List<Conta> listarPorContaTipo(ContaTipo contaTipo){
-		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Conta where contaTipo = :contaTipo");
-		query.setParameter("contaTipo", contaTipo);
-		
-		List<Conta> resultado = query.getResultList();
-		em.close();
+		EntityManager em = getEntityManager();
+		List<Conta> resultado = new ArrayList<>();
+		try {
+			Query query = em.createQuery("from Conta where contaTipo = :contaTipo");
+			query.setParameter("contaTipo", contaTipo);
+			
+			resultado = query.getResultList();
+		}
+		finally {
+			em.close();
+		}
 		return resultado;
 	}
 	
 	public List<Conta> listarPorPeriodoCriacao(LocalDate dataInicial, LocalDate dataFinal) {
-		EntityManager em = emf.createEntityManager();
-		Date sqlDataInicial = Date.valueOf(dataInicial);
-		Date sqlDataFinal = Date.valueOf(dataFinal);
-		
-		Query query = em.createQuery("from Conta where function('DATE', dataAbertura) between :dataInicial and :dataFinal");
-		query.setParameter("dataInicial", sqlDataInicial);
-		query.setParameter("dataFinal", sqlDataFinal);
-		
-		List<Conta> resultado = query.getResultList();
-		em.close();
+		EntityManager em = getEntityManager();
+		List<Conta> resultado = new ArrayList<>();
+		try {
+			Date sqlDataInicial = Date.valueOf(dataInicial);
+			Date sqlDataFinal = Date.valueOf(dataFinal);
+			
+			Query query = em.createQuery("from Conta where function('DATE', dataAbertura) between :dataInicial and :dataFinal");
+			query.setParameter("dataInicial", sqlDataInicial);
+			query.setParameter("dataFinal", sqlDataFinal);
+			
+			resultado = query.getResultList();
+		}
+		finally {
+			em.close();
+		}
 		return resultado;
 	}
 	

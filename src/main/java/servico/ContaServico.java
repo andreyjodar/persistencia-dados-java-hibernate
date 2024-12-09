@@ -10,29 +10,32 @@ import entidade.Movimentacao;
 import entidade.TransacaoTipo;
 import util.JurosComposto;
 
-public class ContaServico {
+public class ContaServico implements InterfaceServico<Conta> {
 	static ContaDAO daoConta = new ContaDAO();
 	static MovimentacaoServico servicoMovimentacao = new MovimentacaoServico();
 	static ClienteServico servicoCliente = new ClienteServico(); 
 	
-	public Conta inserirConta(Conta conta) {
+	@Override
+	public Conta inserir(Conta conta) {
 		if(verificarCamposNaoNulos(conta)) {
 			if(daoConta.listarPorCliente(conta.getCliente().getId()).size() < 3) {
-				return daoConta.inserirConta(conta);
+				return daoConta.inserir(conta);
 			}
 			return null;
 		}
 		return null;
 	}
 	
-	public Conta alterarConta(Conta conta) {
-		return daoConta.alterarConta(conta);
+	@Override
+	public Conta alterar(Conta conta) {
+		return daoConta.alterar(conta);
 	}
 	
-	public void excluirConta(Long idConta) {
+	@Override
+	public void excluir(Long idConta) {
 		if(daoConta.buscarPorId(idConta) != null) {
 			servicoMovimentacao.excluirPorConta(idConta);
-			daoConta.excluirConta(idConta);
+			daoConta.excluir(idConta);
 		}
 	}
 	
@@ -40,7 +43,7 @@ public class ContaServico {
 		daoConta.excluirPorCliente(idCliente);
 	}
 	
-	public static boolean verificarCamposNaoNulos(Conta conta) {
+	private static boolean verificarCamposNaoNulos(Conta conta) {
 		return conta != null && conta.getCliente() != null && conta.getCliente().getId() != null && conta.getContaTipo() != null && conta.getDataAbertura() != null; 
 	}
 	
@@ -62,7 +65,7 @@ public class ContaServico {
 		return saldo + calcularCashbackAcumulado(idConta, dataLimite);
 	}
 	
-	public static void notificarSaldoBaixo(Long idConta) {
+	private static void notificarSaldoBaixo(Long idConta) {
 		if(calcularSaldo(idConta) < 100) {
 			System.out.println("Saldo Baixo: R$" + calcularSaldo(idConta));
 		}
@@ -77,9 +80,10 @@ public class ContaServico {
 		return saques;
 	}
 	
-	public static Double calcularCashbackAcumulado(Long idConta, LocalDate dataLimite) {
+	private static Double calcularCashbackAcumulado(Long idConta, LocalDate dataLimite) {
 		LocalDate dataAberturaConta = daoConta.buscarPorId(idConta).getDataAbertura().toLocalDate();
 		LocalDate ultimoDiaMesAnterior = dataLimite.minusMonths(1).withDayOfMonth(dataLimite.minusMonths(1).lengthOfMonth());
+		
 		List<Movimentacao> transacoes = servicoMovimentacao.listarPeriodicoPorTipoTransacao(idConta, TransacaoTipo.DEBITO_CARTAO, dataAberturaConta, ultimoDiaMesAnterior);
 		Double cashback = 0.0;
 		for (Movimentacao movimentacao : transacoes) {
@@ -88,7 +92,7 @@ public class ContaServico {
 		return cashback;
 	}
 	
-	public static Double calcularRendimentoMensal(Long idConta, Double taxaJuros, Integer meses) {
+	private static Double calcularRendimentoMensal(Long idConta, Double taxaJuros, Integer meses) {
 		Conta conta = daoConta.buscarPorId(idConta);
 		if(conta.getContaTipo() == ContaTipo.CONTA_POUPANCA) {
 			return JurosComposto.calcularRendimento(calcularSaldo(idConta), taxaJuros, meses);
@@ -108,12 +112,14 @@ public class ContaServico {
 		return (saldoUltimoMes + saldoPenultimoMes + saldoAntepenultimoMes) / 3;
 	}
 	
+	@Override
 	public Conta buscarPorId(Long idConta) {
 		return daoConta.buscarPorId(idConta);
 	}
 	
-	public List<Conta> listarTodasContas() {
-		return daoConta.listarTodasContas();
+	@Override
+	public List<Conta> listarTodos() {
+		return daoConta.listarTodos();
 	}
 	
 	public List<Conta> listarPorCliente(Long idCliente) {

@@ -10,12 +10,12 @@ public class MovimentacaoControle {
 	
 	MovimentacaoServico servicoMovimentacao = new MovimentacaoServico();
 		
-	public Movimentacao inserirMovimentacao(Movimentacao movimentacao) {
-		return servicoMovimentacao.inserirMovimentacao(movimentacao);
+	public Movimentacao inserir(Movimentacao movimentacao) {
+		return servicoMovimentacao.inserir(movimentacao);
 	}
 	
-	public void excluirMovimentacao(Long idMovimentacao) {
-		servicoMovimentacao.excluirMovimentacao(idMovimentacao);
+	public void excluir(Long idMovimentacao) {
+		servicoMovimentacao.excluir(idMovimentacao);
 	}
 	
 	public void excluirPorConta(Long idConta) {
@@ -26,8 +26,8 @@ public class MovimentacaoControle {
 		servicoMovimentacao.excluirPorConta(idCliente);
 	}
 	
-	public Movimentacao alterarMovimentacao(Movimentacao movimentacao) {
-		return servicoMovimentacao.alterarMovimentacao(movimentacao);
+	public Movimentacao alterar(Movimentacao movimentacao) {
+		return servicoMovimentacao.alterar(movimentacao);
 	}
 	
 	public Movimentacao getMovimentacaoPorId(Long idMovimentacao) {

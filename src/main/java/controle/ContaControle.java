@@ -10,16 +10,16 @@ import servico.ContaServico;
 public class ContaControle {
 	ContaServico servicoConta = new ContaServico();
 	
-	public Conta inserirConta(Conta conta) {
-		return servicoConta.inserirConta(conta);
+	public Conta inserir(Conta conta) {
+		return servicoConta.inserir(conta);
 	}
 	
-	public Conta alterarConta(Conta conta) {
-		return servicoConta.inserirConta(conta);
+	public Conta alterar(Conta conta) {
+		return servicoConta.inserir(conta);
 	}
 	
-	public void excluirConta(Long idConta) {
-		servicoConta.excluirConta(idConta);
+	public void excluir(Long idConta) {
+		servicoConta.excluir(idConta);
 	}
 	
 	public Conta getContaPorId(Long idConta) {
@@ -27,7 +27,7 @@ public class ContaControle {
 	}
 	
 	public List<Conta> getTodasContas() {
-		return servicoConta.listarTodasContas();
+		return servicoConta.listarTodos();
 	}
 	
 	public List<Conta> getContasPorCliente(Long idCliente) {

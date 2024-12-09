@@ -10,16 +10,16 @@ public class ClienteControle {
 
 	ClienteServico servicoCliente = new ClienteServico();
 	
-	public Cliente inserirCliente(Cliente cliente) {
-		return servicoCliente.inserirCliente(cliente);
+	public Cliente inserir(Cliente cliente) {
+		return servicoCliente.inserir(cliente);
 	}
 	
-	public Cliente alterarCliente(Cliente cliente) {
-		return servicoCliente.alterarCliente(cliente);
+	public Cliente alterar(Cliente cliente) {
+		return servicoCliente.alterar(cliente);
 	}
 	
-	public void excluirCliente(Long idCliente) {
-		servicoCliente.excluirCliente(idCliente);
+	public void excluir(Long idCliente) {
+		servicoCliente.excluir(idCliente);
 	}
 	
 	public Cliente getClientePorId(Long idCliente) {
@@ -31,10 +31,10 @@ public class ClienteControle {
 	}
 	
 	public List<Cliente> getTodosClientes() {
-		return servicoCliente.listarTodosClientes();
+		return servicoCliente.listarTodos();
 	}
 	
-	public List<Cliente> getClientesPorIntervaloNascimento(LocalDate dataInicial, LocalDate dataFinal){
+	public List<Cliente> getClientesPorIntervaloNascimento(LocalDate dataInicial, LocalDate dataFinal) {
 		return servicoCliente.listarPorPeriodoNascimento(dataInicial, dataFinal);
 	}
 

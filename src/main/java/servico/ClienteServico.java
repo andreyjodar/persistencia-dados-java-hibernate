@@ -7,38 +7,42 @@ import dao.ClienteDAO;
 import entidade.Cliente;
 import util.Cpf;
 
-public class ClienteServico {
+public class ClienteServico implements InterfaceServico<Cliente> {
 	ClienteDAO daoCliente = new ClienteDAO();
 	ContaServico servicoConta = new ContaServico();
 	MovimentacaoServico servicoMovimentacao = new MovimentacaoServico();
 
-	public Cliente inserirCliente(Cliente cliente) {
+	@Override
+	public Cliente inserir(Cliente cliente) {
 		if(verificarCamposNaoNulos(cliente) && Cpf.verificarCpf(cliente.getCpf())) {
 			Cliente clienteInsercao = daoCliente.buscarPorCpf(cliente.getCpf());
 			if(clienteInsercao == null) {
-				return daoCliente.inserirCliente(cliente);
+				return daoCliente.inserir(cliente);
 			}
 			return null;
 		} 
 		return null;
 	}
 	
-	public Cliente alterarCliente(Cliente cliente) {
-		return daoCliente.alterarCliente(cliente);
+	@Override
+	public Cliente alterar(Cliente cliente) {
+		return daoCliente.alterar(cliente);
 	}
 	
-	public void excluirCliente(Long idCliente) {
+	@Override
+	public void excluir(Long idCliente) {
 		if(daoCliente.buscarPorId(idCliente) != null) {
 			servicoMovimentacao.excluirPorCliente(idCliente);
 			servicoConta.excluirPorCliente(idCliente);
-			daoCliente.excluirCliente(idCliente);
+			daoCliente.excluir(idCliente);
 		}
 	}
 	
-	public static boolean verificarCamposNaoNulos(Cliente cliente) {
+	private static boolean verificarCamposNaoNulos(Cliente cliente) {
 		return cliente.getCpf() != null && cliente.getNome() != null && cliente.getDataNascimento() != null;
 	}
 	
+	@Override
 	public Cliente buscarPorId(Long idCliente) {
 		return daoCliente.buscarPorId(idCliente);
 	}
@@ -50,11 +54,12 @@ public class ClienteServico {
 		return null;
 	}
 	
-	public List<Cliente> listarTodosClientes() {
-		return daoCliente.listarTodosClientes();
+	@Override
+	public List<Cliente> listarTodos() {
+		return daoCliente.listarTodos();
 	}
 	
-	public List<Cliente> listarPorPeriodoNascimento(LocalDate dataInicial, LocalDate dataFinal){
+	public List<Cliente> listarPorPeriodoNascimento(LocalDate dataInicial, LocalDate dataFinal) {
 		return daoCliente.listarPorPeriodoNascimento(dataInicial, dataFinal);
 	}
 

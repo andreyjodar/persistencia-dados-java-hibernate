@@ -2,6 +2,7 @@ package dao;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -12,95 +13,63 @@ import javax.persistence.Query;
 
 import entidade.Cliente;
 
-public class ClienteDAO {
+public class ClienteDAO extends GenericoDAO<Cliente> {
 	
-	EntityManagerFactory emf = Persistence.createEntityManagerFactory("bancoPU");
-	
-	public Cliente inserirCliente(Cliente cliente) {
-		EntityManager em = emf.createEntityManager();
-		em.getTransaction().begin();
-		
-		em.persist(cliente);
-		
-		em.getTransaction().commit();
-		em.close();
-		return cliente;
+	public ClienteDAO() {
+		super(Cliente.class);
 	}
 	
-	public Cliente alterarCliente(Cliente cliente) {
+	@Override
+	public Cliente alterar(Cliente cliente) {
+		EntityManager em = getEntityManager();
 		Cliente clienteBanco = null;
-		if(cliente.getId() != null) {
-			EntityManager em = emf.createEntityManager();
+		try {
 			em.getTransaction().begin();
 			
 			clienteBanco = em.find(Cliente.class, cliente.getId());
-			
 			if(clienteBanco != null) {
-				cliente.setNome(cliente.getNome());
+				clienteBanco.setNome(cliente.getNome());
 				em.merge(clienteBanco);
 			}
-			
 			em.getTransaction().commit();
+		}
+		finally {
 			em.close();
 		}
-		
 		return clienteBanco;
 	}
 	
-	public void excluirCliente(Long idCliente) {
-		EntityManager em = emf.createEntityManager();
-		em.getTransaction().begin();
-		
-		Cliente clienteBanco = em.find(Cliente.class, idCliente);
-		if(clienteBanco != null) {
-			em.remove(clienteBanco);
-		}
-		
-		em.getTransaction().commit();
-		em.close();
-		
-	}
-	
-	public Cliente buscarPorId(Long idCliente) {
-		EntityManager em = emf.createEntityManager();
-		Cliente cliente = em.find(Cliente.class, idCliente);
-		em.close();
-		return cliente;
-	}
-	
 	public Cliente buscarPorCpf(String cpf) {
-		EntityManager em = emf.createEntityManager();
+		EntityManager em = getEntityManager();
 		try {
 			Query query = em.createQuery("from Cliente where cpf = :cpf");
 			query.setParameter("cpf", cpf);
 			return (Cliente) query.getSingleResult();
-		} catch (NoResultException e) {
+		} 
+		catch (NoResultException e) {
 			return null;
-		} finally {
+		} 
+		finally {
 			em.close();
 		}
 	}
 	
-	public List<Cliente> listarTodosClientes() {
-		EntityManager em = emf.createEntityManager();
-		Query query = em.createQuery("from Cliente");
-		
-		List<Cliente> resultado = query.getResultList();
-		em.close();
-		return resultado;
-	}
-	
 	public List<Cliente> listarPorPeriodoNascimento(LocalDate dataInicial, LocalDate dataFinal) {
-		EntityManager em = emf.createEntityManager();
-		Date sqlDataInicial = Date.valueOf(dataInicial);
-		Date sqlDataFinal = Date.valueOf(dataFinal);
-		
-		Query query = em.createQuery("from Cliente where function('DATE', dataNascimento) between :dataInicial and :dataFinal");
-		query.setParameter("dataInicial", sqlDataInicial);
-		query.setParameter("dataFinal", sqlDataFinal);
-		
-		List<Cliente> resultado = query.getResultList();
-		em.close();
+		EntityManager em = getEntityManager();
+		List<Cliente> resultado;
+		try {
+			Date sqlDataInicial = Date.valueOf(dataInicial);
+			Date sqlDataFinal = Date.valueOf(dataFinal);
+			
+			Query query = em.createQuery("from Cliente where function('DATE', dataNascimento) between :dataInicial and :dataFinal");
+			query.setParameter("dataInicial", sqlDataInicial);
+			query.setParameter("dataFinal", sqlDataFinal);
+			
+			resultado = query.getResultList();
+		} 
+		finally {
+			em.close();
+		}
 		return resultado;
 	}
 	
