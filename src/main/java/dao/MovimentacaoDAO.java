@@ -159,9 +159,9 @@ public class MovimentacaoDAO extends GenericoDAO<Movimentacao> {
 		try {
 			Date sqlDataTransacao = Date.valueOf(dataTransacao);
 			
-			Query query = em.createQuery("from Movimentacao m where where function('DATE', m.dataTransacao) = :dataTransacao and m.conta.id = :idConta");
+			Query query = em.createQuery("from Movimentacao m where function('DATE', m.dataTransacao) = :dataTransacao and m.conta.id = :idConta");
 			query.setParameter("idConta", idConta);
-			query.setParameter("dataTransacao", dataTransacao);
+			query.setParameter("dataTransacao", sqlDataTransacao);
 			
 			resultado = query.getResultList();
 		}

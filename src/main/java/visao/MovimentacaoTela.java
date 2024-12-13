@@ -1,6 +1,8 @@
 package visao;
 
 import java.time.LocalDate;
+import java.util.List;
+
 import controle.*;
 import entidade.*;
 
@@ -21,7 +23,7 @@ public class MovimentacaoTela {
 		controleConta.inserir(new Conta(controleCliente.getClientePorId(1L), ContaTipo.CONTA_CORRENTE));
 		controleConta.inserir(new Conta(controleCliente.getClientePorId(1L), ContaTipo.CONTA_POUPANCA));
 
-		controleMovimentacao.inserir(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.DEPOSITO, 10000.0, "Depósito R$ 10000,00"));
+		Movimentacao mov = controleMovimentacao.inserir(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.DEPOSITO, 10000.0, "Depósito R$ 10000,00"));
 		controleMovimentacao.inserir(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.PIX, 3000.0, "Pix R$ 3000,00"));
 		controleMovimentacao.inserir(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.PIX, 200.0, "Pix R$ 200,00"));
 		controleMovimentacao.inserir(new Movimentacao(controleConta.getContaPorId(1L), TransacaoTipo.PAGAMENTO, 1000.0, "Pagamento R$ 1000,00"));
@@ -48,6 +50,25 @@ public class MovimentacaoTela {
 		controleMovimentacao.inserir(new Movimentacao(controleConta.getContaPorId(2L), TransacaoTipo.DEBITO_CARTAO, 3000.0, "Débito R$ 3000,00"));
 		controleMovimentacao.inserir(new Movimentacao(controleConta.getContaPorId(2L), TransacaoTipo.DEBITO_CARTAO, 1000.0, "Débito R$ 1000,00"));
 		controleMovimentacao.inserir(new Movimentacao(controleConta.getContaPorId(2L), TransacaoTipo.DEPOSITO, 8000.0, "Depósito R$ 8000,00"));
+		
+		imprimirExtrato(controleMovimentacao.getExtratoMensalPorCliente(1L, 12, 2024));
+		imprimirExtrato(controleMovimentacao.getExtratoMensalPorConta(1L, 12, 2024));
+		imprimirExtrato(controleMovimentacao.getMovimentacoesPorDataTransacao(LocalDate.parse("2024-12-12")));
+		
+		controleMovimentacao.excluirPorCliente(1L);
+	}
+	
+	public static void imprimirExtrato(List<Movimentacao> extratos) {
+		System.out.println("-------------- Lista Extrato -------------");
+		for (Movimentacao movimentacao : extratos) {
+			System.out.println("Data Transação " + movimentacao.getDataTransacao());
+			System.out.println("Id Conta " + movimentacao.getId());
+			System.out.println("Valor Operação " + movimentacao.getValorOperacao());
+			System.out.println("Tipo Transação " + movimentacao.getTipoTransacao());
+			System.out.println("Descrição " + movimentacao.getDescricao());
+			System.out.println("Cashback " + movimentacao.getCashback());
+			System.out.println("-------------------------------");
+		}
 	}
 
 }
